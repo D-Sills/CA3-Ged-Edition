@@ -7,13 +7,14 @@ class CharacterControllerComponent : public Component {
 private:
     float _speed;
     Direction _direction;
+    bool isMoving = false;
 
 public:
     static bool validMove(const sf::Vector2f&);
     void move(const sf::Vector2f& p);
     void move(Direction dir);
 
-    CharacterControllerComponent(Entity* p, float speed);
+    explicit CharacterControllerComponent(Entity* p);
     CharacterControllerComponent() = delete;
 
 	float getSpeed() const;
@@ -22,5 +23,10 @@ public:
 	Direction getDirection();
 	void setDirection(Direction direction);
 
+    void update(double dt) override;
+    void render() override;
+
     Entity *_parent;
+
+    bool getIsMoving();
 };

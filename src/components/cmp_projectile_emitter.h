@@ -1,12 +1,15 @@
 #pragma once
 #include "ecm.h"
 #include "cmp_projectile.h"
+#include "../object_pool.h"
 #include <SFML/Audio.hpp>
 #include <vector>
 
 class ProjectileEmitterComponent : public Component {
 public:
-    explicit ProjectileEmitterComponent(Entity* parent, int poolSize, float fireRate);
+    explicit ProjectileEmitterComponent(Entity *parent);
+
+    void init(size_t poolSize, float fireRate, float speed, int damage);
     void update(double dt) override;
     void render() override;
     void fireProjectile(const sf::Vector2f& position, float angle);
@@ -15,11 +18,9 @@ public:
     void setProjectileDamage(int damage);
 
 private:
-    std::vector<std::shared_ptr<ProjectileComponent>> _projectiles;
-    int _poolSize;
-    float _fireRate;
-    float _timeSinceLastFire;
-    sf::Sound _fireSound;
-    sf::SoundBuffer _fireSoundBuffer;
+    ObjectPool<ProjectileComponent> _projectilePool = ObjectPool<ProjectileComponent>(0);
+    float _fireRate{};
+    float _timeSinceLastFire{};
+
 };
 

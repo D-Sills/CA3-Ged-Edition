@@ -4,8 +4,10 @@
 using namespace std;
 using namespace sf;
 
-SpriteComponent::SpriteComponent(Entity* p, const shared_ptr<Texture>& tex, const sf::IntRect& rect)
-        : Component(p), sprite(make_shared<Sprite>()), texture(tex) {
+SpriteComponent::SpriteComponent(Entity* p) : Component(p) {}
+
+void SpriteComponent::init(const shared_ptr<Texture>& tex, const IntRect& rect) {
+    texture = tex;
     sprite->setTexture(*texture);
     if (rect != sf::IntRect()) {
         sprite->setTextureRect(rect);

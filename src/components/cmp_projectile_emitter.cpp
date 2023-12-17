@@ -2,45 +2,46 @@
 #include "../engine/system_resources.h"
 #include "cmp_projectile_emitter.h"
 
-ProjectileEmitterComponent::ProjectileEmitterComponent(Entity* p, int poolSize, float fireRate)
-        : Component(p), _poolSize(poolSize), _fireRate(fireRate), _timeSinceLastFire(0.0f) {
-    // Load fire sound
-    _fireSoundBuffer = *Resources::get<sf::SoundBuffer>("FireSound.wav");
-    _fireSound.setBuffer(_fireSoundBuffer);
+ProjectileEmitterComponent::ProjectileEmitterComponent(Entity *p)
+        : Component(p) { }
 
+void ProjectileEmitterComponent::init(size_t poolSize, float fireRate, float speed, int damage) {
     // Initialize projectile pool
-    for (int i = 0; i < _poolSize; ++i) {
-        auto projectile = _parent->scene->makeEntity();
-        projectile->addComponent<ProjectileComponent>(/* Texture, Angle, Speed, Damage */);
-        _projectiles.push_back(projectile->getComponent<ProjectileComponent>());
-    }
+    _projectilePool = ObjectPool<ProjectileComponent>(poolSize);
+
+    _fireRate = fireRate;
+
+    _projectilePool.forEach([speed, damage](auto proj) {
+        proj->setSpeed(speed);
+        proj->setDamage(damage);
+    });
 }
 
 void ProjectileEmitterComponent::update(double dt) {
     _timeSinceLastFire += dt;
 
     // Update projectiles
-    for (auto& proj : _projectiles) {
+    _projectilePool.forEach([dt](auto proj) {
         proj->update(dt);
-    }
+    });
 }
 
 void ProjectileEmitterComponent::render() {
-    for (auto& proj : _projectiles) {
-        proj->render();
-    }
+    _projectilePool.forEach([](auto proj) {
+        if (proj->isVisible()) {
+            proj->render();
+        }
+    });
 }
 
 void ProjectileEmitterComponent::fireProjectile(const sf::Vector2f& position, float angle) {
     if (_timeSinceLastFire < _fireRate) return;
 
-    for (auto& proj : _projectiles) {
-        if (!proj->isVisible()) {
-            proj->fire(position, angle);
-            _fireSound.play(); //TODO: audio manager
-            _timeSinceLastFire = 0.0f;
-            break;
-        }
+    auto proj = _projectilePool.acquireObject();
+    if (proj) {
+        proj->fire(position, angle);
+        //_fireSound.play(); // TODO: Use AudioManager when available
+        _timeSinceLastFire = 0.0f;
     }
 }
 
@@ -49,13 +50,13 @@ void ProjectileEmitterComponent::setFireRate(float fireRate) {
 }
 
 void ProjectileEmitterComponent::setProjectileSpeed(float speed) {
-    for (auto& proj : _projectiles) {
+    _projectilePool.forEach([speed](auto proj) {
         proj->setSpeed(speed);
-    }
+    });
 }
 
 void ProjectileEmitterComponent::setProjectileDamage(int damage) {
-    for (auto& proj : _projectiles) {
+    _projectilePool.forEach([damage](auto proj) {
         proj->setDamage(damage);
-    }
+    });
 }

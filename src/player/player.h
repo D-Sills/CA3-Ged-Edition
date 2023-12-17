@@ -1,16 +1,25 @@
 
 #include "../components/cmp_character.h"
+#include "../components/cmp_animator.h"
+#include "../components/cmp_projectile_emitter.h"
 
-class player : public cmp_character {
+class Player {
+private:
+    std::shared_ptr<sf::Texture> _idle;
+    std::shared_ptr<sf::Texture> _run;
+
+    std::shared_ptr<CharacterComponent> _character;
+    std::shared_ptr<CharacterControllerComponent> _controller;
+    std::shared_ptr<AnimatorComponent> _animator;
+    std::shared_ptr<SpriteComponent> _spriteComp;
+    std::shared_ptr<ProjectileEmitterComponent> _projectileEmitter;
+
+    shared_ptr<Entity> _player;
 public:
-    player() = delete;
-    explicit player(Entity* p);
+    Player(Scene *const s, sf::Vector2f position);
 
-    void update(double dt) override;
-    void render() override;
-    ~player() override = default;
+    void update(double dt);
+    void render();
 
-    void attack(double dt) override;
-
-    void move(const double dt, const float dir_x, const float dir_y);
+    Entity* getEntity() const;
 };

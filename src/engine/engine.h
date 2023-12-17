@@ -9,7 +9,11 @@
 class Engine {
 public:
 
-	Engine() = delete;
+
+
+    Engine() = delete;
+    void operator=(Engine const&) = delete;
+
 	static void Start(unsigned int width, unsigned int height,
 		const std::string& gameName, Scene* scn);
 	static void ChangeScene(Scene*);

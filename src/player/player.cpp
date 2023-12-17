@@ -1,35 +1,96 @@
 
 #include "player.h"
-#include "../engine/scene.h"
+
 #include "../engine/system_resources.h"
 #include "../components/cmp_sprite.h"
-#include "../components/cmp_actor_movement.h"
+#include "../components/cmp_character_controller.h"
+#include "DataReader.h"
+#include "../last_light.h"
+#include "maths.h"
 
 using namespace std;
 using namespace sf;
 
-player::player(Scene* s) {
-    player = makeEntity();
-    playerSpriteIdle = make_shared<Texture>();
-    playerSpriteMoving = make_shared<Texture>();
-    playerRect = IntRect();
-    playerSpriteIdle = Resources::get<Texture>("Idle.png");
-    playerSpriteMoving = Resources::get<Texture>("Run.png");
+Player::Player(Scene *const s, sf::Vector2f position) {
+    _player = s->makeEntity();
+    _player->setPosition(position);
 
-    _sprite->setTexture(playerSpriteIdle);
+    // Add a Sprite Component
+    _spriteComp = _player->addComponent<SpriteComponent>();
+    _spriteComp->init(Resources::get<Texture>("player.png"));
 
-    auto pspriteBounds = Vector2f(_sprite->getSprite().getTextureRect().width * 0.5f, _sprite->getSprite().getTextureRect().height * 0.5f);
-    _sprite->getSprite().setOrigin(75, 75);
-    _sprite->getSprite().setScale(2, 2);
+    // Add an Animation Component
+    _animator = _player->addComponent<AnimatorComponent>();
 
-    auto panimation = player->addComponent<AnimationComponent>();
-    panimation->setAnimation(8, 0.1, playerSpriteIdle, playerRect);
 
-    _movement->setSpeed(_speed);
+    // Add a Character Movement Component
+    _controller = _player->addComponent<CharacterControllerComponent>();
+    _controller->setSpeed(100.0f);
 
-    auto pshooting = player->addComponent<ShootingComponent>();
+    // Add a Character Component
+    _character = _player->addComponent<CharacterComponent>();
+
+    // Add a Projectile Emitter Component
+    _projectileEmitter = _player->addComponent<ProjectileEmitterComponent>();
+
+    // Set up the components
+    _idle = Resources::get<Texture>("player.png");
+    _spriteComp->setTexture(_idle);
+
+    // Set up animation frames
+    Frame frame1(/* frame details */);
+    Frame frame2(/* frame details */);
+    // Add more frames as needed
+    _animator->addFrame(frame1);
+    _animator->addFrame(frame2);
+    // ...
+
+    // Load from CSV
+    auto stats = DataReader::readStatsFromCSV("path/to/file.csv");
+    auto health = stats["Player"].attributes["health"];
+    auto speed = stats["Player"].attributes["speed"];
+
+    _controller->setSpeed(speed);
+    _character->setHealth(health);
+    _character->setDamage(10);
+
 }
 
-player::Update() {
+void Player::update(double dt) {
+    //update view on player
 
+
+    _player->update(dt);
+
+    // movement
+    if (Keyboard::isKeyPressed(Keyboard::A)) {
+        ;
+    }
+
+    // spin to face mouse
+    auto pos = _player->getPosition();
+    auto mousePos = Engine::GetWindow().mapPixelToCoords(Mouse::getPosition(Engine::GetWindow()));
+    auto angle = atan2(mousePos.y - pos.y, mousePos.x - pos.x);
+    _player->setRotation(deg2rad(angle) + 90);
+
+    // shooting
+    if (Mouse::isButtonPressed(Mouse::Left)) {
+        _projectileEmitter->fireProjectile(_player->getPosition(), angle);
+    }
+
+    // animation
+    if (_controller->getIsMoving()) {
+        _animator->play();
+    } else {
+        _animator->stop();
+    }
+
+}
+
+void Player::render() {
+    //_player->render();
+}
+
+Entity *Player::getEntity() const {
+    return _player.get();
 }

@@ -17,7 +17,8 @@ void AnimatorComponent::setAnimation(const shared_ptr<Texture>& texture, const v
     if (!spriteComponents.empty()) {
         spriteComponents[0]->setTextureRect(frames[frameCount].rect);
     } else {
-        _parent->addComponent<SpriteComponent>(texture, frames[frameCount].rect);
+        _parent->addComponent<SpriteComponent>();
+        _parent->GetCompatibleComponent<SpriteComponent>()[0]->init(texture, frames[frameCount].rect);
     }
     frames = newFrames;
     frameCount = 0;

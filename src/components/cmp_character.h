@@ -22,5 +22,8 @@ public:
     int getHealth() const;
     int getDamage() const;
 
+    void update(double dt) override;
+    void render() override;
+
     Entity *_parent;
 };

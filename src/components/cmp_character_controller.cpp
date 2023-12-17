@@ -5,7 +5,7 @@
 using namespace sf;
 using namespace std;
 
-CharacterControllerComponent::CharacterControllerComponent(Entity* p, float speed) : Component(p), _speed(speed), _direction(Direction::Down) { _parent = p; }
+CharacterControllerComponent::CharacterControllerComponent(Entity* p) : Component(p), _direction(Direction::Down) { _parent = p; }
 
 void CharacterControllerComponent::move(const sf::Vector2f& p) {
     auto new_pos = _parent->getPosition() + (p * _speed);
@@ -44,4 +44,8 @@ Direction CharacterControllerComponent::getDirection() {
 
 void CharacterControllerComponent::setDirection(Direction direction) {
     _direction = direction;
+}
+
+bool CharacterControllerComponent::getIsMoving() {
+    return isMoving;
 }

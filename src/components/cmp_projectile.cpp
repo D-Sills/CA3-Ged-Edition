@@ -2,6 +2,8 @@
 #include "../engine/system_renderer.h"
 #include "../engine/system_resources.h"
 #include "../engine/engine.h"
+#include "../engine/scene.h"
+#include "cmp_sprite.h"
 #include <cmath>
 
 using namespace sf;
@@ -49,7 +51,8 @@ void ProjectileComponent::update(double dt) {
         spriteBounds.height -= 70;
         if (enemy->isAlive() && spriteBounds.intersects(boundingBox))
         {
-            this->isVisible = false;
+            // Hide the bullet
+            _isVisible = false;
             setPosition(-100, -100);
 
             // Hit Sound

@@ -1,8 +1,7 @@
 #pragma once
 
 #include "ecm.h"
-#include <SFML/Graphics/RectangleShape.hpp>
-#include <SFML/Graphics/Text.hpp>
+#include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
 
 enum ButtonState { Idle, Hover, Active, Down };

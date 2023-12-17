@@ -1,8 +1,9 @@
 #include "cmp_button.h"
-#include "AudioManager.h"
 #include "../../engine/system_resources.h"
 #include "SFML/Window/Mouse.hpp"
 #include "../../engine/engine.h"
+#include "../../audio_manager.h"
+#include "../../engine/system_renderer.h"
 
 using namespace sf;
 using namespace std;
@@ -29,7 +30,7 @@ Button::Button(Entity* parent, const sf::Vector2f& position, const std::string& 
 }
 
 void Button::update(double dt) {
-    Vector2f mousePos = Mouse::getPosition(Engine::GetWindow());
+    Vector2<float> mousePos = Mouse::getPosition(Engine::GetWindow());
     auto state = Mouse::isButtonPressed(Mouse::Left) ? ButtonState::Down : ButtonState::Idle;
 
     if (shape.getGlobalBounds().contains(mousePos)) {
