@@ -1,34 +1,21 @@
 #include "cmp_character.h"
 
-cmp_character::cmp_character(Entity *p) {
-    _parent = p;
-    _health = 100;
-    _damage = 10;
-    _speed = 100.0f;
-    _attackTime = 0.0f;
-    _deathTime = 0.0f;
-    _texture = make_shared<Texture>();
-    _texture->loadFromFile("res/img/character.png");
-    _sprite = _parent->addComponent<SpriteComponent>();
-    _movement = _parent->addComponent<ActorMovementComponent>();
-}
+CharacterComponent::CharacterComponent(Entity* p) : Component(p), _health(100), _damage(10), _attackTime(0.0f), _deathTime(0.0f) { _parent = p; }
 
-void cmp_character::set_health(int health) {
+void CharacterComponent::setHealth(int health) {
     _health = health;
 }
 
-int cmp_character::get_health() const {
-    return _health;
-}
-
-void cmp_character::set_damage(int damage) {
+void CharacterComponent::setDamage(int damage) {
     _damage = damage;
 }
 
-float cmp_character::get_speed() const {
-    return _speed;
+int CharacterComponent::getHealth() const {
+    return _health;
 }
 
-void cmp_character::set_speed(float speed) {
-    _speed = speed;
+int CharacterComponent::getDamage() const {
+    return _damage;
 }
+
+

@@ -1,7 +1,7 @@
 //Player component header file
 #pragma once
 
-#include "cmp_actor_movement.h"
+#include "cmp_character_controller.h"
 #include <ecm.h>
 
 enum move_states { WASD, Arrows };

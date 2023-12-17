@@ -1,21 +1,20 @@
-include <SFML/Graphics.hpp>
+#pragma once
+#include "ecm.h"
+#include <SFML/Graphics.hpp>
 
-class cmp_bar {
+class UIBarComponent : public Component {
 public:
+    explicit UIBarComponent(Entity* p, const sf::Vector2f& size, sf::Color fillColor, float maxVal = 100.0f, float currentVal = 100.0f);
 
+    void update(double dt) override;
+    void render() override;
 
-    void update(double dt) {}
-
-    cmp_bar(Entity* p) : Component(p), _value(100.0f), _maxValue(100.0f) {}
-
-    float getValue() const { return _value; }
-
-    float setValue(float value) { _value = value; }
-
+    void setValue(float val);
+    void setMaxValue(float maxVal);
 
 private:
-    float _value;
+    sf::RectangleShape _barBackground;
+    sf::RectangleShape _barFill;
     float _maxValue;
-    float sf::RectangleShape;
-
+    float _currentValue;
 };

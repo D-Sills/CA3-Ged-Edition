@@ -7,6 +7,9 @@
 extern MenuScene menu;
 extern SettingsScene settings;
 extern PlanetLevelScene planetLevel;
+
+extern sf::RenderWindow window;
+
 extern short unsigned switchState;
 extern short unsigned switchRes;
 extern int volume;
