@@ -2,6 +2,7 @@
 #include "../components/cmp_character.h"
 #include "../components/cmp_animator.h"
 #include "../components/cmp_projectile_emitter.h"
+#include "../components/cmp_collider.h"
 
 class Player {
 private:
@@ -13,6 +14,7 @@ private:
     std::shared_ptr<AnimatorComponent> _animator;
     std::shared_ptr<SpriteComponent> _spriteComp;
     std::shared_ptr<ProjectileEmitterComponent> _projectileEmitter;
+    std::shared_ptr<ColliderComponent> _collider;
 
     shared_ptr<Entity> _player;
 public:

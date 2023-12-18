@@ -7,6 +7,7 @@
 #include "DataReader.h"
 #include "../last_light.h"
 #include "maths.h"
+#include "../engine/system_physics.h"
 
 using namespace std;
 using namespace sf;
@@ -22,6 +23,19 @@ Player::Player(Scene *const s, sf::Vector2f position) {
     // Add an Animation Component
     _animator = _player->addComponent<AnimatorComponent>();
 
+    // Add a Collider Component
+    b2BodyDef bodyDef;
+    bodyDef.type = b2_dynamicBody;  // Change as needed
+    bodyDef.position.Set(_player->getPosition().x / PIXEL_PER_METER, _player->getPosition().y / PIXEL_PER_METER);
+
+    b2PolygonShape dynamicBox;
+    dynamicBox.SetAsBox(0.5f, 0.5f);  // Set box size
+
+    b2FixtureDef fixtureDef;
+    fixtureDef.shape = &dynamicBox;
+    fixtureDef.density = 1.0f;
+    fixtureDef.friction = 0.3f;
+    _collider = _player->addComponent<ColliderComponent>(bodyDef, fixtureDef);
 
     // Add a Character Movement Component
     _controller = _player->addComponent<CharacterControllerComponent>();
@@ -31,7 +45,7 @@ Player::Player(Scene *const s, sf::Vector2f position) {
     _character = _player->addComponent<CharacterComponent>();
 
     // Add a Projectile Emitter Component
-    _projectileEmitter = _player->addComponent<ProjectileEmitterComponent>();
+    _projectileEmitter = _player->addComponent<ProjectileEmitterComponent>(10, 0.5f, 100.0f, 10);
 
     // Set up the components
     _idle = Resources::get<Texture>("player.png");

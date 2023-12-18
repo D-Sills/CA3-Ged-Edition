@@ -7,9 +7,8 @@
 
 class ProjectileEmitterComponent : public Component {
 public:
-    explicit ProjectileEmitterComponent(Entity *parent);
+    ProjectileEmitterComponent(Entity* p, int poolSize, float fireRate, float speed, int damage);
 
-    void init(size_t poolSize, float fireRate, float speed, int damage);
     void update(double dt) override;
     void render() override;
     void fireProjectile(const sf::Vector2f& position, float angle);

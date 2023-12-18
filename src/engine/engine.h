@@ -6,11 +6,16 @@
 #include <mutex>
 #include <string>
 
+enum class GameStates {
+    MENU,
+    GAME,
+    PAUSE,
+    GAMEOVER,
+    WIN
+};
+
 class Engine {
 public:
-
-
-
     Engine() = delete;
     void operator=(Engine const&) = delete;
 
@@ -24,6 +29,7 @@ public:
 	static void moveView(sf::Vector2f);
 	static void changeResolution(int x, int y);
     static Scene* _activeScene;
+    static GameStates _gameState;
 	static sf::Vector2f flocking(Entity* thisEnemy, sf::Vector2f toPlayer);
 
 private:

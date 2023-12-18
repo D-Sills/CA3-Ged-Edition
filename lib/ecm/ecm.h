@@ -64,6 +64,9 @@ public:
 
 	virtual void render();
 
+    virtual void onCollision(Entity* other) {
+    }
+
 	//
 	const sf::Vector2f& getPosition() const;
 

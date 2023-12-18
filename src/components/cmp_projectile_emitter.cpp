@@ -2,10 +2,8 @@
 #include "../engine/system_resources.h"
 #include "cmp_projectile_emitter.h"
 
-ProjectileEmitterComponent::ProjectileEmitterComponent(Entity *p)
-        : Component(p) { }
-
-void ProjectileEmitterComponent::init(size_t poolSize, float fireRate, float speed, int damage) {
+ProjectileEmitterComponent::ProjectileEmitterComponent(Entity *p, int poolSize, float fireRate, float speed, int damage)
+        : Component(p) {
     // Initialize projectile pool
     _projectilePool = ObjectPool<ProjectileComponent>(poolSize);
 
