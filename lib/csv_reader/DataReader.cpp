@@ -1,10 +1,11 @@
-#include <fstream>
-#include <vector>
-#include <sstream>
 #include "DataReader.h"
+#include <fstream>
+#include <sstream>
+#include <vector>
+#include <stdexcept>
 
-std::unordered_map<std::string, EntityStats> DataReader::readStatsFromCSV(const std::string& filename) {
-    std::unordered_map<std::string, EntityStats> statsMap;
+std::unordered_map<std::string, EntityAttributes> DataReader::readStatsFromCSV(const std::string& filename) {
+    std::unordered_map<std::string, EntityAttributes> statsMap;
     std::ifstream file(filename);
 
     if (!file.is_open()) {
@@ -12,25 +13,30 @@ std::unordered_map<std::string, EntityStats> DataReader::readStatsFromCSV(const 
     }
 
     std::string line;
-    std::getline(file, line); // Read the header line and ignore it
+    std::getline(file, line); // Read the header line
+
+    std::stringstream headerSS(line);
+    std::string columnName;
+    std::vector<std::string> columnNames;
+    while (std::getline(headerSS, columnName, ',')) {
+        columnNames.push_back(columnName);
+    }
 
     while (std::getline(file, line)) {
         std::stringstream ss(line);
         std::string cell;
-        std::vector<std::string> rowData;
+        EntityAttributes attributes;
+        std::string entityName;
 
-        while (std::getline(ss, cell, ',')) {
-            rowData.push_back(cell);
+        for (size_t i = 0; std::getline(ss, cell, ',') && i < columnNames.size(); ++i) {
+            if (i == 0) {
+                entityName = cell;
+            } else {
+                attributes.attributes[columnNames[i]] = std::stof(cell);
+            }
         }
 
-        if (rowData.size() == 4) {
-            EntityStats stat;
-            stat.name = rowData[0];
-            stat.health = std::stof(rowData[1]);
-            stat.damage = std::stof(rowData[2]);
-            stat.speed = std::stof(rowData[3]);
-            statsMap[stat.name] = stat;
-        }
+        statsMap[entityName] = attributes;
     }
 
     return statsMap;
