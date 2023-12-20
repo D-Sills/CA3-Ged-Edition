@@ -30,7 +30,8 @@ Button::Button(Entity* parent, const sf::Vector2f& position, const std::string& 
 }
 
 void Button::update(double dt) {
-    Vector2<float> mousePos = Mouse::getPosition(Engine::GetWindow());
+    auto t = Mouse::getPosition(Engine::GetWindow());
+    auto mousePos = Engine::GetWindow().mapPixelToCoords(t);
     auto state = Mouse::isButtonPressed(Mouse::Left) ? ButtonState::Down : ButtonState::Idle;
 
     if (shape.getGlobalBounds().contains(mousePos)) {

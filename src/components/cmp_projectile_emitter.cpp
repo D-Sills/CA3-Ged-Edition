@@ -1,18 +1,12 @@
 
 #include "../engine/system_resources.h"
+#include "../audio_manager.h"
 #include "cmp_projectile_emitter.h"
 
-ProjectileEmitterComponent::ProjectileEmitterComponent(Entity *p, int poolSize, float fireRate, float speed, int damage)
-        : Component(p) {
-    // Initialize projectile pool
-    _projectilePool = ObjectPool<ProjectileComponent>(poolSize);
-
-    _fireRate = fireRate;
-
-    _projectilePool.forEach([speed, damage](auto proj) {
-        proj->setSpeed(speed);
-        proj->setDamage(damage);
-    });
+ProjectileEmitterComponent::ProjectileEmitterComponent(Entity *p,float fireRate, float speed, int damage)
+        : Component(p), _fireRate(fireRate) {
+    setProjectileDamage(damage);
+    setProjectileSpeed(speed);
 }
 
 void ProjectileEmitterComponent::update(double dt) {
@@ -32,15 +26,19 @@ void ProjectileEmitterComponent::render() {
     });
 }
 
-void ProjectileEmitterComponent::fireProjectile(const sf::Vector2f& position, float angle) {
-    if (_timeSinceLastFire < _fireRate) return;
+bool ProjectileEmitterComponent::fireProjectile(const sf::Vector2f& position, float angle) {
+    if (_timeSinceLastFire < _fireRate) return false;
 
-    auto proj = _projectilePool.acquireObject();
-    if (proj) {
+    auto entity = _projectilePool.acquireObject();
+    if (entity) {
+        auto proj = entity->get_components<ProjectileComponent>()[0];
         proj->fire(position, angle);
-        //_fireSound.play(); // TODO: Use AudioManager when available
+        AudioManager::get_instance().playSoundEffect("shoot");
         _timeSinceLastFire = 0.0f;
+        return true;
     }
+
+    return false;
 }
 
 void ProjectileEmitterComponent::setFireRate(float fireRate) {
@@ -48,13 +46,19 @@ void ProjectileEmitterComponent::setFireRate(float fireRate) {
 }
 
 void ProjectileEmitterComponent::setProjectileSpeed(float speed) {
-    _projectilePool.forEach([speed](auto proj) {
-        proj->setSpeed(speed);
+    _projectilePool.forEach([speed](const std::shared_ptr<Entity>& entity) {
+        auto proj = entity->get_components<ProjectileComponent>()[0];
+        if (proj) {
+            proj->setSpeed(speed);
+        }
     });
 }
 
 void ProjectileEmitterComponent::setProjectileDamage(int damage) {
-    _projectilePool.forEach([damage](auto proj) {
-        proj->setDamage(damage);
+    _projectilePool.forEach([damage](const std::shared_ptr<Entity>& entity) {
+        auto proj = entity->get_components<ProjectileComponent>()[0];
+        if (proj) {
+            proj->setDamage(damage);
+        }
     });
 }

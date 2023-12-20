@@ -1,3 +1,7 @@
+#pragma once
+#ifndef CHARACTER_H
+#define CHARACTER_H
+
 #include <memory>
 #include <SFML/Graphics.hpp>
 #include "cmp_character_controller.h"
@@ -22,8 +26,13 @@ public:
     int getHealth() const;
     int getDamage() const;
 
-    void update(double dt) override;
-    void render() override;
+    void update(double dt) override {
 
-    Entity *_parent;
+    }
+
+    void render() override {
+
+    }
 };
+
+#endif

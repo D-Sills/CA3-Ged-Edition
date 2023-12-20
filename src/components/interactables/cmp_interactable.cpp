@@ -16,5 +16,6 @@ void InteractableComponent::interact() {
 }
 
 sf::FloatRect InteractableComponent::getBounds() const {
-    return _parent->get_components<sf::Sprite>()->getGlobalBounds();
+
+    return {};
 }

@@ -2,8 +2,6 @@
 #include "player.h"
 
 #include "../engine/system_resources.h"
-#include "../components/cmp_sprite.h"
-#include "../components/cmp_character_controller.h"
 #include "DataReader.h"
 #include "../last_light.h"
 #include "maths.h"
@@ -12,99 +10,112 @@
 using namespace std;
 using namespace sf;
 
-Player::Player(Scene *const s, sf::Vector2f position) {
-    _player = s->makeEntity();
-    _player->setPosition(position);
-
+Player::Player(Entity* p): Component(p) {
     // Add a Sprite Component
-    _spriteComp = _player->addComponent<SpriteComponent>();
-    _spriteComp->init(Resources::get<Texture>("player.png"));
-
-    // Add an Animation Component
-    _animator = _player->addComponent<AnimatorComponent>();
+    _spriteComp = _parent->addComponent<SpriteComponent>();
+    auto tex = Resources::load<Texture>("player.png");
+    if (tex) {
+        std::cout << "Loaded player texture" << std::endl;
+        _spriteComp->setTexture(tex);
+    }
 
     // Add a Collider Component
     b2BodyDef bodyDef;
-    bodyDef.type = b2_dynamicBody;  // Change as needed
-    bodyDef.position.Set(_player->getPosition().x / PIXEL_PER_METER, _player->getPosition().y / PIXEL_PER_METER);
-
+    bodyDef.type = b2_kinematicBody;  // Change as needed
+    bodyDef.position.Set(_parent->getPosition().x / Physics::PIXEL_PER_METER , _parent->getPosition().y / Physics::PIXEL_PER_METER);
     b2PolygonShape dynamicBox;
-    dynamicBox.SetAsBox(0.5f, 0.5f);  // Set box size
+    dynamicBox.SetAsBox(32.0f / Physics::PIXEL_PER_METER, 32.0f / Physics::PIXEL_PER_METER);  // Change as needed
 
     b2FixtureDef fixtureDef;
     fixtureDef.shape = &dynamicBox;
     fixtureDef.density = 1.0f;
     fixtureDef.friction = 0.3f;
-    _collider = _player->addComponent<ColliderComponent>(bodyDef, fixtureDef);
+
+    _collider = _parent->addComponent<ColliderComponent>(bodyDef, fixtureDef);
 
     // Add a Character Movement Component
-    _controller = _player->addComponent<CharacterControllerComponent>();
-    _controller->setSpeed(100.0f);
+    _controller = _parent->addComponent<CharacterControllerComponent>(bodyDef, fixtureDef);
 
     // Add a Character Component
-    _character = _player->addComponent<CharacterComponent>();
+    _character = _parent->addComponent<CharacterComponent>();
 
     // Add a Projectile Emitter Component
-    _projectileEmitter = _player->addComponent<ProjectileEmitterComponent>(10, 0.5f, 100.0f, 10);
+    _projectileEmitter = _parent->addComponent<ProjectileEmitterComponent>(0.5f, 100.0f, 10);
 
-    // Set up the components
-    _idle = Resources::get<Texture>("player.png");
-    _spriteComp->setTexture(_idle);
 
-    // Set up animation frames
-    Frame frame1(/* frame details */);
-    Frame frame2(/* frame details */);
-    // Add more frames as needed
-    _animator->addFrame(frame1);
-    _animator->addFrame(frame2);
-    // ...
 
     // Load from CSV
-    auto stats = DataReader::readStatsFromCSV("path/to/file.csv");
-    auto health = stats["Player"].attributes["health"];
-    auto speed = stats["Player"].attributes["speed"];
+    //auto stats = DataReader::readStatsFromCSV("path/to/file.csv");
+   // auto health = stats["Player"].attributes["health"];
+    //auto speed = stats["Player"].attributes["speed"];
 
-    _controller->setSpeed(speed);
-    _character->setHealth(health);
+    _controller->setSpeed(2);
+    _character->setHealth(50);
     _character->setDamage(10);
+
+    currentBullet = bulletMax;
 
 }
 
 void Player::update(double dt) {
     //update view on player
 
-
-    _player->update(dt);
-
     // movement
-    if (Keyboard::isKeyPressed(Keyboard::A)) {
-        ;
+    if (Keyboard::isKeyPressed(sf::Keyboard::W)) {
+        _controller->move(Vector2f(0, -1));
+    }
+    if (Keyboard::isKeyPressed(sf::Keyboard::S)) {
+        _controller->move(Vector2f(0, 1));
+    }
+    if (Keyboard::isKeyPressed(sf::Keyboard::A)) {
+        _controller->move(Vector2f(-1, 0));
+    }
+    if (Keyboard::isKeyPressed(sf::Keyboard::D)) {
+        _controller->move(Vector2f(1, 0));
     }
 
-    // spin to face mouse
-    auto pos = _player->getPosition();
-    auto mousePos = Engine::GetWindow().mapPixelToCoords(Mouse::getPosition(Engine::GetWindow()));
-    auto angle = atan2(mousePos.y - pos.y, mousePos.x - pos.x);
-    _player->setRotation(deg2rad(angle) + 90);
+    std::cout << "Player position: " << _parent->getPosition().x << ", " << _parent->getPosition().y << std::endl;
+    // Calculate the position of the mouse relative to the world
+    auto mousePosWindow = Mouse::getPosition(Engine::GetWindow()); // Mouse position relative to the window
+    auto mousePosView = Engine::GetWindow().mapPixelToCoords(mousePosWindow); // Convert to world coordinates
 
-    // shooting
+// Calculate the position of the parent entity
+    auto pos = _parent->getPosition();
+
+// Calculate the angle between the entity and the mouse position
+// atan2 returns the angle in radians, with the y-axis going downward
+    auto angleRadians = atan2(mousePosView.y - pos.y, mousePosView.x - pos.x);
+
+// Convert the angle to degrees
+    auto angleDegrees = angleRadians * 180.0f / M_PI;
+
+// SFML's setRotation expects 0 degrees to be facing right, and positive angles go clockwise
+// So we adjust by -90 degrees to make 0 degrees face upwards
+    _parent->setRotation(angleDegrees);
+
+
     if (Mouse::isButtonPressed(Mouse::Left)) {
-        _projectileEmitter->fireProjectile(_player->getPosition(), angle);
+        // shoot
+        if (currentBullet <= 0) {
+            // reload
+        } else {
+            if (_projectileEmitter->fireProjectile(_parent->getPosition(), angleRadians)) {
+                std::cout << "Fired projectile" << std::endl;
+                currentBullet--;
+            }
+        }
     }
 
-    // animation
-    if (_controller->getIsMoving()) {
-        _animator->play();
-    } else {
-        _animator->stop();
+    if (Keyboard::isKeyPressed(Keyboard::R)) {
+        // reload
     }
 
+    if (Keyboard::isKeyPressed(Keyboard::E)) {
+        // interact with object
+    }
 }
 
 void Player::render() {
-    //_player->render();
+
 }
 
-Entity *Player::getEntity() const {
-    return _player.get();
-}

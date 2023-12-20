@@ -9,12 +9,14 @@
 using namespace sf;
 using namespace std;
 
-ProjectileComponent::ProjectileComponent(Entity* p, const sf::Texture& texture, float angle, float speed, int damage)
-        : Component(p), _angle(angle), _speed(speed), _damage(damage), _isVisible(true) {
-    setTexture(texture);
-    setRotation(angle);
-    _hitSoundBuffer = *Resources::get<SoundBuffer>("Hit.wav");
-    _hitSound.setBuffer(_hitSoundBuffer);
+ProjectileComponent::ProjectileComponent(Entity* p)
+        : Component(p) {
+    _isVisible = false;
+    _speed = 1000.0f;
+    _damage = 1;
+    _angle = 0.0f;
+    _sprite = make_shared<Sprite>();
+    _sprite->setTexture(*Resources::load<Texture>("bulletGlow.png"));
 }
 
 void ProjectileComponent::update(double dt) {
@@ -37,34 +39,14 @@ void ProjectileComponent::update(double dt) {
         move(dx, dy);
     }
 
+    _sprite->setPosition(getPosition());
+
+    // Check for collisions
     auto ecm = Engine::_activeScene->ents.list;
     auto enemies = Engine::_activeScene->ents.find("enemy");
     auto boundingBox = getGlobalBounds();
 
-    for (const auto& enemy : enemies)
-    {
-        auto sprite = enemy->GetCompatibleComponent<SpriteComponent>()[0]->getSprite();
-        auto spriteBounds = sprite.getGlobalBounds();
-        spriteBounds.top += 40;
-        spriteBounds.left += 40;
-        spriteBounds.width -= 70;
-        spriteBounds.height -= 70;
-        if (enemy->isAlive() && spriteBounds.intersects(boundingBox))
-        {
-            // Hide the bullet
-            _isVisible = false;
-            setPosition(-100, -100);
 
-            // Hit Sound
-            soundHit_buffer = Resources::get<SoundBuffer>("Hit.wav");
-            soundHit = make_shared<Sound>(*soundHit_buffer);
-            soundHit->setVolume(volume);
-            soundHit->play();
-
-            auto currentHealth = enemy->GetCompatibleComponent<MonsterComponent>()[0]->get_health();
-            enemy->GetCompatibleComponent<MonsterComponent>()[0]->set_health(currentHealth - _damage);
-        }
-    }
 }
 
 void ProjectileComponent::fire(const sf::Vector2f& pos, float ang) {
@@ -83,6 +65,7 @@ void ProjectileComponent::render() {
     // Render only if visible
     if (_isVisible) {
         Renderer::queue(this);
+        Renderer::queue(_sprite.get());
     }
 }
 

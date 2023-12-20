@@ -1,3 +1,4 @@
+#include <iostream>
 #include "system_resources.h"
 
 namespace Resources {
@@ -7,6 +8,7 @@ namespace Resources {
 		if (!f->loadFromFile("res/fonts/" + name)) {
 			throw("not found: " + name);
 		};
+        std::cout << "Loaded font: " << name << std::endl;
 		return f;
 	};
 

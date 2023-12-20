@@ -13,8 +13,7 @@ class Component {
 	friend Entity;
 
 protected:
-	Entity* const _parent;
-	bool _fordeletion; // should be removed
+    bool _fordeletion; // should be removed
 	explicit Component(Entity* const p);
 
 public:
@@ -27,6 +26,8 @@ public:
 	virtual void render() = 0;
 
 	virtual ~Component();
+
+    Entity* const _parent;
 };
 
 struct EntityManager {
@@ -94,16 +95,16 @@ public:
 	template <typename T, typename... Targs>
 	std::shared_ptr<T> addComponent(Targs... params) {
 		static_assert(std::is_base_of<Component, T>::value, "T != component");
-		std::shared_ptr<T> sp(std::make_shared<T>(this, params...));
-		_components.push_back(sp);
-		return sp;
+        std::shared_ptr<T> ret = std::make_shared<T>(this, params...);
+        _components.push_back(ret);
+        return ret;
 	}
 
 	template <typename T>
-	const std::vector<std::shared_ptr<T>> get_components() const {
+	std::vector<std::shared_ptr<T>> get_components() const {
 		static_assert(std::is_base_of<Component, T>::value, "T != component");
 		std::vector<std::shared_ptr<T>> ret;
-		for (const auto c : _components) {
+		for (const auto& c : _components) {
 			if (typeid(*c) == typeid(T)) {
 				ret.push_back(std::dynamic_pointer_cast<T>(c));
 			}
@@ -113,7 +114,7 @@ public:
 
 	// Will return a T component, or anything derived from a T component.
 	template <typename T>
-	const std::vector<std::shared_ptr<T>> GetCompatibleComponent() {
+	std::vector<std::shared_ptr<T>> GetCompatibleComponent() {
 		static_assert(std::is_base_of<Component, T>::value, "T != component");
 		std::vector<std::shared_ptr<T>> ret;
 		for (auto c : _components) {

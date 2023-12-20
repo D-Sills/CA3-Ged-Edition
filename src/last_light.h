@@ -1,16 +1,12 @@
 #pragma once
 
 #include "scenes/scene_menu.h"
-#include "scenes/scene_settings.h"
-#include "scenes/scene_planet_level.h"
+#include "scenes/scene_test.h"
 
-extern MenuScene menu;
-extern SettingsScene settings;
-extern PlanetLevelScene planetLevel;
 
+extern TestScene testScene;
+extern MenuScene menuScene;
 extern sf::RenderWindow window;
 
-extern short unsigned switchState;
-extern short unsigned switchRes;
 extern int volume;
 extern sf::Vector2i resolution;

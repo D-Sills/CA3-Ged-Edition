@@ -5,9 +5,8 @@
 
 class TextComponent : public Component {
 public:
-	int sizeOfText;
 	TextComponent() = delete;
-	explicit TextComponent(Entity* p, float x, float y, const std::string& str = "");
+	explicit TextComponent(Entity* p, float x, float y, const std::string&  str, const std::string& font);
 	void update(double dt) override;
 
 	void render() override;
@@ -19,6 +18,5 @@ public:
 
 protected:
 	std::shared_ptr<sf::Font> _font;
-	std::string _string;
 	sf::Text _text;
 };

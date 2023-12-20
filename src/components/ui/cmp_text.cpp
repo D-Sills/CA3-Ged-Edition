@@ -1,4 +1,6 @@
 #include "cmp_text.h"
+
+#include <utility>
 #include "../../engine/system_renderer.h"
 #include "../../engine/system_resources.h"
 
@@ -6,26 +8,26 @@ void TextComponent::update(double dt) {}
 
 void TextComponent::render() { Renderer::queue(&_text); }
 
-TextComponent::TextComponent(Entity* const p, float x, float y, const std::string& str)
-	: Component(p), _string(str), sizeOfText(50) {
-	_text.setString(_string);
-	// https://en.sfml-dev.org/forums/index.php?topic=15875.0 //
-	_font = Resources::get<sf::Font>("RobotoMono-Regular.ttf");
+TextComponent::TextComponent(Entity* const p, float x, float y, const std::string&  str, const std::string& font)
+	: Component(p) {
+	_text.setString(str);
+
+	_font = Resources::load<sf::Font>(font);
 	_text.setFont(*_font);
-	_text.setCharacterSize(sizeOfText);
+	_text.setCharacterSize(16);
+    _text.setFillColor(sf::Color::White);
 	_text.setPosition(sf::Vector2f(x, y));
 	_text.setOrigin(_text.getLocalBounds().left + _text.getLocalBounds().width / 2.0f,
 		_text.getLocalBounds().top + _text.getLocalBounds().height / 2.0f);
 }
 
 void TextComponent::SetText(const std::string& str) {
-	_string = str;
-	_text.setString(_string);
+	_text.setString(str);
 }
 
-void TextComponent::setTextSize(int sizeOfText)
+void TextComponent::setTextSize(int size)
 {
-	_text.setCharacterSize(sizeOfText);
+	_text.setCharacterSize(size);
 	_text.setOrigin(_text.getLocalBounds().left + _text.getLocalBounds().width / 2.0f,
 		_text.getLocalBounds().top + _text.getLocalBounds().height / 2.0f);
 }

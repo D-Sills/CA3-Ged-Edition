@@ -1,51 +1,39 @@
 #include "cmp_character_controller.h"
 #include "ecm.h"
-#include <LevelSystem.h>
+#include "../engine/system_physics.h"
 
 using namespace sf;
 using namespace std;
 
-CharacterControllerComponent::CharacterControllerComponent(Entity* p) : Component(p), _direction(Direction::Down) { _parent = p; }
+CharacterControllerComponent::CharacterControllerComponent(Entity* p, const b2BodyDef& bodyDef, const b2FixtureDef& fixtureDef) : Component(p),_direction(Direction::Down) {
+    _body = Physics::GetWorld()->CreateBody(&bodyDef);
+    _body->CreateFixture(&fixtureDef);
+    _body->SetUserData(p);
+    _body->SetLinearDamping(1);
+}
 
 void CharacterControllerComponent::move(const sf::Vector2f& p) {
-    auto new_pos = _parent->getPosition() + (p * _speed);
-    if (validMove(new_pos)) {
-        _parent->setPosition(new_pos);
-    }
+    _moveDirection += b2Vec2(p.x, p.y);
 }
 
-void CharacterControllerComponent::move(Direction dir) {
-    _direction = dir;
-    Vector2f movement;
-    switch(dir) {
-        case Direction::Up: movement = Vector2f(0, -1); break;
-        case Direction::Down: movement = Vector2f(0, 1); break;
-        case Direction::Left: movement = Vector2f(-1, 0); break;
-        case Direction::Right: movement = Vector2f(1, 0); break;
+void CharacterControllerComponent::update(double dt) {
+    if (_moveDirection.LengthSquared() > 0) {
+    // Normalize if diagonal movement to prevent faster speed
+    _moveDirection.Normalize();
+    auto vel = b2Vec2(_moveDirection.x * _speed, _moveDirection.y * _speed);
+    _body->SetLinearVelocity(vel);
+    // Reset the move direction after applying the velocity
+    _moveDirection = b2Vec2(0, 0);
+    } else {
+    // Stop movement when there is no move command
+    _body->SetLinearVelocity(b2Vec2(0, 0));
     }
-    move(movement);
-}
 
-bool CharacterControllerComponent::validMove(const sf::Vector2f& pos) {
-    return (LevelSystem::getTileAt(pos) != LevelSystem::WALL);
+    // Update parent's position from physics body
+    auto pos = _body->GetPosition();
+    _parent->setPosition(sf::Vector2f(pos.x * Physics::PIXEL_PER_METER, pos.y * Physics::PIXEL_PER_METER));
 }
 
 void CharacterControllerComponent::setSpeed(float speed) {
     _speed = speed;
-}
-
-float CharacterControllerComponent::getSpeed() const {
-    return _speed;
-}
-
-Direction CharacterControllerComponent::getDirection() {
-    return _direction;
-}
-
-void CharacterControllerComponent::setDirection(Direction direction) {
-    _direction = direction;
-}
-
-bool CharacterControllerComponent::getIsMoving() {
-    return isMoving;
 }

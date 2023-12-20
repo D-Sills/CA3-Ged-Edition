@@ -2,13 +2,14 @@
 #include <SFML/Audio.hpp>
 #include <string>
 #include <unordered_map>
+#include <memory>
 
 class AudioManager {
 public:
     static AudioManager& get_instance();
 
     bool loadMusic(const std::string& filename);
-    void playMusic();
+    void playMusic(const std::string& filename);
     void pauseMusic();
     void stopMusic();
     void setMusicVolume(float new_volume);
@@ -22,7 +23,7 @@ public:
 
 private:
     AudioManager();
-    sf::Music music;
+    std::shared_ptr<sf::Music> music;
     float musicVolume;
     std::unordered_map<std::string, sf::SoundBuffer> soundBuffers;
     std::unordered_map<std::string, sf::Sound> sounds;

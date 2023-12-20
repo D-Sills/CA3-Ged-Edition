@@ -2,6 +2,7 @@
 #include "maths.h"
 #include "engine.h"
 #include "system_resources.h"
+#include "scene.h"
 #include "system_renderer.h"
 #include <SFML/Graphics.hpp>
 

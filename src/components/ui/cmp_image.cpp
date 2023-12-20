@@ -1,5 +1,5 @@
 #include "cmp_image.h"
-#include "../engine/system_renderer.h"
+#include "../../engine/system_renderer.h"
 
 using namespace sf;
 

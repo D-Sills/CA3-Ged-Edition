@@ -23,9 +23,10 @@ void Entity::update(double dt) {
 	}
 	for (size_t i = 0; i < _components.size(); i++) {
 		if (_components[i]->is_fordeletion()) {
-			_components.erase(_components.begin() + i);
-			--i;
-		}
+            _components.erase(_components.begin() + i);
+            --i;
+            continue;
+        }
 		_components[i]->update(dt);
 	}
 }
@@ -75,33 +76,21 @@ void Entity::setVisible(bool _visible) { Entity::_visible = _visible; }
 Component::Component(Entity* const p) : _parent(p), _fordeletion(false) {}
 
 Entity::~Entity() {
-	// Components can inter-depend on each other, so deleting them may take
-	// multiple passes. We Keep deleting components until we can't delete any
-	// more
-	int deli = 0;
-	while (deli != _components.size()) {
-		deli = _components.size();
-		_components.erase(
-			remove_if(_components.begin(), _components.end(),
-				[](auto& sp) { return (sp.use_count() <= 1); }),
-			_components.end());
-	}
 
-	if (_components.size() > 0) {
-		throw std::runtime_error(
-			"Can't delete entity, someone is grabbing a component!");
-	}
 
 	_components.clear();
 }
 
-Component::~Component() {}
+Component::~Component() = default;
 
 bool Component::is_fordeletion() const { return _fordeletion; }
 
 void EntityManager::update(double dt) {
 	for (size_t i = 0; i < list.size(); i++) {
 		if (list[i]->is_fordeletion()) {
+            //print the tag of the entity that is being deleted
+            std::cout << "Entity with tag: " << list[i]->getTags().begin()->c_str() << " is being deleted" << std::endl;
+
 			list.erase(list.begin() + i);
 			--i;
 			continue;

@@ -2,77 +2,55 @@
 #include "../last_light.h"
 #include "LevelSystem.h"
 #include <iostream>
-#include"../components/ui/cmp_button.h"
-#include "../engine/engine.h"
 #include "../engine/system_resources.h"
 #include "../engine/system_renderer.h"
-#include "../components/ui/cmp_text.h"
 #include <SFML/Audio.hpp>
-#include <iostream>
 
 using namespace std;
-using namespace sf;
-
-View menuView;
-
-sf::Music music;
-
-shared_ptr<Entity> btnExit;
-shared_ptr<Entity> btnSetting;
-shared_ptr<Entity> btnStart;
-
-Sprite background;
 
 void MenuScene::Load() {
-	cout << "Menu Load \n";
+    ui_ecm = new EntityManager();
+    *ui_ecm = Scene::getUiEcm();
 
-	menuView.reset(FloatRect(0, 0, resolution.x, resolution.y));
-	RenderWindow& window = Engine::GetWindow();
-	Vector2u windowSize = window.getSize();
+	menuView.reset(FloatRect(0, 0, Engine::GetWindow().getSize().x, Engine::GetWindow().getSize().y));
+    Engine::setView(menuView);
 
 	// set background
-	auto backTexture = Resources::get<Texture>("Space_Background.png");
+	auto backTexture = Resources::get<Texture>("background.png");
 	background.setTexture(*backTexture);
 
-	auto txt = makeEntity();
-	auto pos = Vector2f(menuView.getSize().x / 2.0f, menuView.getSize().y / 5.0f);
-	auto t = txt->addComponent<TextComponent>(menuView.getSize().x / 2.0f, menuView.getSize().y / 5.0f, "DROP POD");
 
-	btnExit = makeEntity();
-	auto btnPos = Vector2f(menuView.getSize().x / 2.0f, menuView.getSize().y / 1.5f);
+	auto txt= makeUiEntity();
+	auto pos = Vector2f(menuView.getSize().x / 2.0f, menuView.getSize().y / 5.0f);
+	auto t = txt->addComponent<TextComponent>(menuView.getSize().x / 2.0f, menuView.getSize().y / 5.0f, "Last Light", "resident_evil_4_remake_font_by_snakeyboy_df7kacs.ttf");
+
+	btnExit = makeUiEntity();
+	auto btnPos = Vector2f(menuView.getSize().x / 2, menuView.getSize().y / 1);
 	auto button = btnExit->addComponent<Button>(btnPos, "Exit", sf::Color::White, sf::Color::Green, sf::Color::Red);
 
-	btnSetting = makeEntity();
+	btnSetting = makeUiEntity();
 	auto btn2Pos = Vector2f(menuView.getSize().x / 2.0f, menuView.getSize().y / 2.f);
 	auto button2 = btnSetting->addComponent<Button>(btn2Pos, "Setting", sf::Color::White, sf::Color::Green, sf::Color::Red);
 
-	btnStart = makeEntity();
+	btnStart = makeUiEntity();
 	auto btn3Pos = Vector2f(menuView.getSize().x / 2.0f, menuView.getSize().y / 3.f);
 	auto button3 = btnStart->addComponent<Button>(btn3Pos, "Play", sf::Color::White, sf::Color::Green, sf::Color::Red);
-
-	auto musicstatus = music.getStatus();
-	if (musicstatus == SoundSource::Stopped || musicstatus == SoundSource::Paused)
-	{
-		if (!music.openFromFile("res/assets/background_music/Cold-Moon.ogg"))
-			printf("music broken"); // error
-		music.setVolume(volume);
-		music.setLoop(true);
-		music.play();
-	}
 
 	setLoaded(true);
 }
 
 void MenuScene::Update(const double& dt) {
+    if (!isLoaded()) return;
+
 	if (btnStart->GetCompatibleComponent<Button>()[0]->isPressed())
 	{
-		Engine::ChangeScene(&planetLevel);
+        Engine::ChangeScene(&testScene);
 		ls::setTextureMap("res/assets/tiles/grass.png");
 		music.stop();
 	}
 	else if (btnSetting->GetCompatibleComponent<Button>()[0]->isPressed())
 	{
-		Engine::ChangeScene(&settings);
+
 	}
 	else if (btnExit->GetCompatibleComponent<Button>()[0]->isPressed())
 	{
@@ -80,14 +58,17 @@ void MenuScene::Update(const double& dt) {
 	}
 
 	if (!sf::Mouse::isButtonPressed(Mouse::Button::Left))
-		Button::_mouseState = BUTTON_IDLE;
+		//Button::_mouseState = BUTTON_IDLE;
 
 	Scene::Update(dt);
+    ui_ecm->update(dt);
 }
 
 void MenuScene::Render()
 {
-	Renderer::queue(&background);
+    if (!isLoaded()) return;
+
 	Engine::setView(menuView);
+    ui_ecm->render();
 	Scene::Render();
 }

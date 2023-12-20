@@ -5,7 +5,7 @@
 
 class ProjectileComponent : public Component, public sf::Sprite {
 public:
-    explicit ProjectileComponent(Entity* p, const sf::Texture& texture, float angle, float speed, int damage);
+    explicit ProjectileComponent(Entity* p);
     void update(double dt) override;
     void render() override;
 
@@ -15,10 +15,11 @@ public:
     void setSpeed(float speed);
     void setDamage(int damage);
 private:
-    float _angle;
-    float _speed;
-    int _damage;
-    bool _isVisible;
-    sf::Sound _hitSound;
-    sf::SoundBuffer _hitSoundBuffer;
+    float _angle{};
+    float _speed{};
+    int _damage{};
+    bool _isVisible{};
+
+    std::shared_ptr<sf::Sprite> _sprite;
+
 };

@@ -5,13 +5,14 @@
 #include <maths.h>
 #include <mutex>
 #include <string>
+#include "AStar.hpp"
 
 enum class GameStates {
     MENU,
-    GAME,
+    PREPARE,
+    WAVE,
     PAUSE,
     GAMEOVER,
-    WIN
 };
 
 class Engine {
@@ -26,11 +27,11 @@ public:
 	static sf::Vector2u getWindowSize();
 	static void setVsync(bool b);
 	static void setView(sf::View);
-	static void moveView(sf::Vector2f);
+	static void moveView(sf::View view,sf::Vector2f);
 	static void changeResolution(int x, int y);
     static Scene* _activeScene;
+    static AStar::Generator generator;
     static GameStates _gameState;
-	static sf::Vector2f flocking(Entity* thisEnemy, sf::Vector2f toPlayer);
 
 private:
 

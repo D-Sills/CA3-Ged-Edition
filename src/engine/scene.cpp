@@ -1,10 +1,17 @@
 #include "scene.h"
+#include "engine.h"
 
-void Scene::Update(const double& dt) { ents.update(dt); }
+void Scene::Update(const double& dt) {
 
-void Scene::Render() { ents.render(); }
+}
+
+void Scene::Render() {
+
+}
 
 EntityManager Scene::getEcm() { return ents; }
+
+EntityManager Scene::getUiEcm() { return ui_ents; }
 
 bool Scene::isLoaded() const {
     {
@@ -30,6 +37,7 @@ void Scene::setLoaded(bool b) {
 
 void Scene::UnLoad() {
     ents.list.clear();
+    ui_ents.list.clear();
     setLoaded(false);
 }
 
@@ -41,8 +49,11 @@ std::shared_ptr<Entity> Scene::makeEntity() {
     return std::move(e);
 }
 
-//void Scene::addEntity(shared_ptr<Entity> entity) {
-//	ents.list.push_back(entity);
-//}
+std::shared_ptr<Entity> Scene::makeUiEntity() {
+    auto e = std::make_shared<Entity>(this);
+    ui_ents.list.push_back(e);
+    std::cout << "Entity with tag: " << e->getTags().begin()->c_str() << " is being created" << std::endl;
+    return std::move(e);
+}
 
 Scene::~Scene() { UnLoad(); }

@@ -1,19 +1,25 @@
 #include "system_physics.h"
 #include "Box2D/Box2D.h"
+#include "../collision_listener.h"
 
 using namespace std;
 using namespace sf;
 
 namespace Physics {
 	static shared_ptr<b2World> world;
-	const int32 velocityIterations = 6;
-	const int32 positionIterations = 2;
+	const int32 velocityIterations = 8;
+    const int32 positionIterations = 3;
+    
 
 	void initialise() {
-		b2Vec2 gravity(0.0f, -10.0f);
+        Box2DContactListener contactListener;
+		b2Vec2 gravity(0.0f, 0.0f);
 		// Construct a world object, which will hold and simulate the rigid
 		// bodies.
+
+        //
 		world.reset(new b2World(gravity));
+        world->SetContactListener(&contactListener);
 	}
 
 	void shutdown() { world.reset(); }

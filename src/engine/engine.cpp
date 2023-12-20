@@ -2,18 +2,19 @@
 #include "maths.h"
 #include "system_physics.h"
 #include "system_renderer.h"
-#include "system_resources.h"
 #include "loading_screen.h"
 #include <SFML/Graphics.hpp>
 #include <future>
 #include <iostream>
-//include scene
 #include "scene.h"
 
 using namespace sf;
 using namespace std;
 Scene* Engine::_activeScene = nullptr;
 std::string Engine::_gameName;
+AStar::Generator Engine::generator;
+GameStates Engine::_gameState;
+
 static RenderWindow* _window;
 
 float frameTimes[256] = {};
@@ -62,8 +63,9 @@ void Engine::Start(unsigned int width, unsigned int height,
 	_gameName = gameName;
 	_window = &window;
 	Renderer::initialise(window);
-	Physics::initialise();
+    Physics::initialise();
 	ChangeScene(scn);
+
 	while (window.isOpen()) {
 		Event event{};
 		while (window.pollEvent(event)) {
@@ -81,21 +83,18 @@ void Engine::Start(unsigned int width, unsigned int height,
 		_activeScene->UnLoad();
 		_activeScene = nullptr;
 	}
+
 	window.close();
 	Physics::shutdown();
 	// Render::shutdown();
 }
 
-
-
 void Engine::setVsync(bool b) { _window->setVerticalSyncEnabled(b); }
 
 void Engine::setView(View v) { _window->setView(v); }
 
-void Engine::moveView(Vector2f movement) {
-	View getView = _window->getView();
-	getView.move(movement);
-	Engine::setView(getView);
+void Engine::moveView(View view,Vector2f pos) {
+    view.setCenter(pos);
 }
 
 // CHANGE RES PART
@@ -117,106 +116,10 @@ void Engine::ChangeScene(Scene* s) {
 	if (!s->isLoaded()) {
 		cout << "Eng: Entering Loading Screen\n";
 
-        LoadingScreen::Load();
+        //LoadingScreen::Load();
         _activeScene->LoadAsync();
 	}
 }
-
-sf::Vector2f Engine::flocking(Entity* thisEnemy, Vector2f toPlayer)
-{
-	//shared_ptr<Entity> choosenEnemy = make_shared<Entity>(thisEnemy);
-	Vector2f movement = Vector2f(0, 0);
-	Vector2f alignment = Vector2f(0, 0);
-	Vector2f cohesion = Vector2f(0, 0);
-	Vector2f separation = Vector2f(0, 0);
-	int neighborCount = 0;
-
-	auto ecm = _activeScene->getEcm();
-	auto enemies = ecm.find("enemy");
-
-	for (shared_ptr<Entity>& enemy : enemies)
-	{
-		Entity* rawEnemy = enemy.get();
-		if (rawEnemy != thisEnemy)
-		{
-			float xDistance = enemy->getPosition().x - thisEnemy->getPosition().x;
-			float yDistance = enemy->getPosition().y - thisEnemy->getPosition().y;
-
-			auto distance = (xDistance * xDistance) + (yDistance * yDistance);
-
-			if (distance < 3000)
-			{
-				alignment.x += toPlayer.x;
-				alignment.y += toPlayer.y;
-				neighborCount++;
-			}
-		}
-	}
-
-	if (neighborCount == 0)
-	{
-		return alignment;
-	}
-
-	alignment.x /= neighborCount;
-	alignment.y /= neighborCount;
-	alignment = normalize(alignment);
-
-	// Cohesion ----------------------------------------------------------------------------------------------
-	for (shared_ptr<Entity>& enemy : enemies)
-	{
-		Entity* rawEnemy = enemy.get();
-		if (rawEnemy != thisEnemy)
-		{
-			float xDistance = enemy->getPosition().x - thisEnemy->getPosition().x;
-			float yDistance = enemy->getPosition().y - thisEnemy->getPosition().y;
-
-			auto distance = (xDistance * xDistance) + (yDistance * yDistance);
-
-			if (distance < 3000)
-			{
-				cohesion.x += enemy->getPosition().x;
-				cohesion.y += enemy->getPosition().y;
-			}
-		}
-	}
-
-	cohesion.x /= neighborCount;
-	cohesion.y /= neighborCount;
-
-	cohesion = Vector2f(cohesion.x - thisEnemy->getPosition().x, cohesion.y - thisEnemy->getPosition().y);
-	cohesion = normalize(cohesion);
-
-	// Separation -------------------------------------------------------------------------------------------
-	for (shared_ptr<Entity>& enemy : enemies)
-	{
-		Entity* rawEnemy = enemy.get();
-		if (rawEnemy != thisEnemy)
-		{
-			float xDistance = enemy->getPosition().x - thisEnemy->getPosition().x;
-			float yDistance = enemy->getPosition().y - thisEnemy->getPosition().y;
-
-			auto distance = (xDistance * xDistance) + (yDistance * yDistance);
-
-			if (distance < 3000)
-			{
-				separation.x += enemy->getPosition().x - thisEnemy->getPosition().x;
-				separation.y += enemy->getPosition().y - thisEnemy->getPosition().y;
-			}
-		}
-	}
-
-	separation.x *= -1;
-	separation.y *= -1;
-
-	movement.x = toPlayer.x + alignment.x + cohesion.x + separation.x;
-	movement.y = toPlayer.y + alignment.y + cohesion.y + separation.y;
-
-	movement = normalize(movement);
-	return movement;
-}
-
-
 
 sf::Vector2u Engine::getWindowSize() { return _window->getSize(); }
 

@@ -1,5 +1,5 @@
-#include "AudioManager.h"
 #include "audio_manager.h"
+#include "engine/system_resources.h"
 
 AudioManager& AudioManager::get_instance() {
     static AudioManager instance;
@@ -9,28 +9,32 @@ AudioManager& AudioManager::get_instance() {
 AudioManager::AudioManager() : musicVolume(100.0f), globalSoundVolume(100.0f) {}
 
 bool AudioManager::loadMusic(const std::string& filename) {
-    bool success = music.openFromFile(filename);
-    if (success) {
-        music.setVolume(musicVolume);
+    auto m = Resources::load<sf::Music>(filename);
+    if (m) {
+        music->setVolume(musicVolume);
     }
-    return success;
+    return true;
 }
 
-void AudioManager::playMusic() {
-    music.play();
+void AudioManager::playMusic(const std::string& filename) {
+    music = Resources::load<sf::Music>(filename);
+    if (music) {
+        music->play();
+        music->setVolume(musicVolume);
+    }
 }
 
 void AudioManager::pauseMusic() {
-    music.pause();
+    music->pause();
 }
 
 void AudioManager::stopMusic() {
-    music.stop();
+    music->stop();
 }
 
 void AudioManager::setMusicVolume(float new_volume) {
     musicVolume = new_volume;
-    music.setVolume(musicVolume);
+    music->setVolume(musicVolume);
 }
 
 float AudioManager::getMusicVolume() const {
@@ -38,7 +42,7 @@ float AudioManager::getMusicVolume() const {
 }
 
 bool AudioManager::isMusicPlaying() const {
-    return music.getStatus() == sf::Music::Playing;
+    return music->getStatus() == sf::Music::Playing;
 }
 
 void AudioManager::loadSoundEffect(const std::string& name, const std::string& filename) {

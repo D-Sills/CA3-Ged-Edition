@@ -7,8 +7,7 @@
 
 class MenuScene : public Scene {
 public:
-	MenuScene() = default;
-	~MenuScene() override = default;
+    EntityManager* ui_ecm;
 
 	void Load() override;
 
