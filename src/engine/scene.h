@@ -13,18 +13,18 @@ public:
     virtual ~Scene();
     virtual void Load() = 0;
     virtual void LoadAsync();
-    virtual void UnLoad();
+    void UnLoad();
     virtual void Update(const double& dt);
     virtual void Render();
     bool isLoaded() const;
 
-    std::shared_ptr<Entity> makeEntity();
-    std::shared_ptr<Entity> makeUiEntity();
+    std::shared_ptr<Entity> makeEntity(const std::string& tag = "");
+    std::shared_ptr<Entity> makeUiEntity(const std::string& tag = "");
 
-    EntityManager ents;
+    EntityManager ecm;
     virtual EntityManager getEcm();
 
-    EntityManager ui_ents;
+    EntityManager ui_ecm;
     virtual EntityManager getUiEcm();
 protected:
     void setLoaded(bool);

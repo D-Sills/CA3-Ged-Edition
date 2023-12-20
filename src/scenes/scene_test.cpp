@@ -11,21 +11,7 @@
 using namespace std;
 using namespace sf;
 
-void TestScene::init() {
-	ecm = new EntityManager();
-    ui_ecm = new EntityManager();
-
-	// Level global variables
-	result = "Not Set";
-
-    // View variables
-}
-
 void TestScene::Load() {
-	init();
-	*ecm = Scene::getEcm();
-    *ui_ecm = Scene::getUiEcm();
-
 	//ls::loadLevelFile("res/levels/floorMap.txt");
 
 	int xCount = 25;
@@ -55,10 +41,6 @@ void TestScene::Load() {
     Engine::_gameState = GameStates::PREPARE;
 }
 
-void TestScene::UnLoad() {
-	Scene::UnLoad();
-}
-
 void TestScene::Update(const double& dt) {
     if (!isLoaded()) return;
 
@@ -82,10 +64,8 @@ void TestScene::Update(const double& dt) {
 
         }
 
-		Scene::Update(dt);
-        ents.update(dt);
-        
-        ui_ents.update(dt);
+        ecm.update(dt);
+        ui_ecm.update(dt);
 	}
 
     if (Keyboard::isKeyPressed(Keyboard::Enter)) {
@@ -100,11 +80,10 @@ void TestScene::Render() {
 
     Engine::setView(gameView);
     //ls::renderFloor(Engine::GetWindow());
-    ents.render();
-	Scene::Render();
+    ecm.render();
 
     Engine::setView(uiView);
-    ui_ents.render();
+    ui_ecm.render();
     if (Engine::_gameState == GameStates::PAUSE) {
 
     }

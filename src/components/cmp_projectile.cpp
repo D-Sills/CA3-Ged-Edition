@@ -42,8 +42,8 @@ void ProjectileComponent::update(double dt) {
     _sprite->setPosition(getPosition());
 
     // Check for collisions
-    auto ecm = Engine::_activeScene->ents.list;
-    auto enemies = Engine::_activeScene->ents.find("enemy");
+    auto ecm = Engine::_activeScene->ecm.list;
+    auto enemies = Engine::_activeScene->ecm.find("enemy");
     auto boundingBox = getGlobalBounds();
 
 

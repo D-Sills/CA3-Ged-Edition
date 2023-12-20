@@ -1,17 +1,13 @@
 #include "scene.h"
 #include "engine.h"
 
-void Scene::Update(const double& dt) {
+void Scene::Update(const double& dt) {}
 
-}
+void Scene::Render() {}
 
-void Scene::Render() {
+EntityManager Scene::getEcm() { return ecm; }
 
-}
-
-EntityManager Scene::getEcm() { return ents; }
-
-EntityManager Scene::getUiEcm() { return ui_ents; }
+EntityManager Scene::getUiEcm() { return ui_ecm; }
 
 bool Scene::isLoaded() const {
     {
@@ -36,23 +32,26 @@ void Scene::setLoaded(bool b) {
 }
 
 void Scene::UnLoad() {
-    ents.list.clear();
-    ui_ents.list.clear();
+    ecm.list.clear();
+    ui_ecm.list.clear();
     setLoaded(false);
 }
 
 void Scene::LoadAsync() { _loaded_future = std::async(&Scene::Load, this); }
 
-std::shared_ptr<Entity> Scene::makeEntity() {
+std::shared_ptr<Entity> Scene::makeEntity(const std::string& tag) {
     auto e = std::make_shared<Entity>(this);
-    ents.list.push_back(e);
+    e->addTag(tag);
+    std::cout << "makeEntity: " << tag << std::endl;
+    ecm.list.push_back(e);
     return std::move(e);
 }
 
-std::shared_ptr<Entity> Scene::makeUiEntity() {
+std::shared_ptr<Entity> Scene::makeUiEntity(const std::string& tag) {
     auto e = std::make_shared<Entity>(this);
-    ui_ents.list.push_back(e);
-    std::cout << "Entity with tag: " << e->getTags().begin()->c_str() << " is being created" << std::endl;
+    e->addTag(tag);
+    std::cout << "makeUiEntity: " << tag << std::endl;
+    ui_ecm.list.push_back(e);
     return std::move(e);
 }
 
