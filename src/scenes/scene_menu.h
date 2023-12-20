@@ -6,6 +6,11 @@
 #include "SFML/Graphics/Sprite.hpp"
 
 class MenuScene : public Scene {
+private:
+    void startGame();
+    void exitGame();
+    void openSettings();
+
 public:
 	void Load() override;
 

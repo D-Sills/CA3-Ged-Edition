@@ -33,7 +33,7 @@ bool ProjectileEmitterComponent::fireProjectile(const sf::Vector2f& position, fl
     if (entity) {
         auto proj = entity->get_components<ProjectileComponent>()[0];
         proj->fire(position, angle);
-        AudioManager::get_instance().playSoundEffect("shoot");
+        AudioManager::get_instance().playSound("Shoot_001");
         _timeSinceLastFire = 0.0f;
         return true;
     }

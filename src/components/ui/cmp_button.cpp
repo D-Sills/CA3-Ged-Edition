@@ -1,4 +1,6 @@
 #include "cmp_button.h"
+
+#include <utility>
 #include "../../engine/system_resources.h"
 #include "SFML/Window/Mouse.hpp"
 #include "../../engine/engine.h"
@@ -9,9 +11,9 @@ using namespace sf;
 using namespace std;
 
 Button::Button(Entity* parent, const sf::Vector2f& position, const std::string& txt,
-               const sf::Color& idleCol, const sf::Color& hoverCol, const sf::Color& activeCol)
+               const sf::Color& idleCol, const sf::Color& hoverCol, const sf::Color& activeCol, bool hasTexture, std::function<void()> onClickFunc)
         : Component(parent), idleColor(idleCol), hoverColor(hoverCol), activeColor(activeCol),
-          buttonState(ButtonState::Idle), isHoveredFirstTime(true) {
+          buttonState(ButtonState::Idle), isHoveredFirstTime(true), onClickFunc(std::move(onClickFunc)) {
 
     auto& font = *Resources::get<Font>("font.ttf");
     text.setFont(font);
@@ -21,56 +23,51 @@ Button::Button(Entity* parent, const sf::Vector2f& position, const std::string& 
     auto bounds = text.getLocalBounds();
     text.setOrigin(bounds.width / 2, bounds.height / 2);
 
-    shape.setSize(Vector2f(200, 70));
-    shape.setFillColor(idleColor);
-    shape.setOrigin(100, 35); // Center origin based on size
+    if (hasTexture) {
+        auto& texture = *Resources::load<Texture>("button_texture.png");
+        shape.setTexture(&texture);
+        shape.setSize(static_cast<sf::Vector2f>(texture.getSize()));
+        shape.setOrigin(shape.getSize() / 2.0f);
+    } else {
+        shape.setSize(Vector2f(200, 70));
+        shape.setOrigin(shape.getSize() / 2.0f);
+    }
     shape.setPosition(position);
 
     text.setPosition(shape.getPosition());
 }
 
 void Button::update(double dt) {
-    auto t = Mouse::getPosition(Engine::GetWindow());
-    auto mousePos = Engine::GetWindow().mapPixelToCoords(t);
-    auto state = Mouse::isButtonPressed(Mouse::Left) ? ButtonState::Down : ButtonState::Idle;
+    auto mousePos = Engine::GetWindow().mapPixelToCoords(Mouse::getPosition(Engine::GetWindow()));
 
     if (shape.getGlobalBounds().contains(mousePos)) {
-        state = (state == ButtonState::Idle) ? ButtonState::Hover : state;
-
-        if (state == ButtonState::Hover && isHoveredFirstTime) {
-            AudioManager::get_instance().playSoundEffect("buttonHover");
-            isHoveredFirstTime = false;
+        if (Mouse::isButtonPressed(Mouse::Left)) {
+            if (buttonState != ButtonState::Down) {
+                AudioManager::get_instance().playSound("Click");
+                if (onClickFunc) {
+                    onClickFunc(); // Execute the callback
+                }
+                shape.setFillColor(activeColor);
+            }
+            buttonState = ButtonState::Down;
+        } else {
+            if (isHoveredFirstTime) {
+                AudioManager::get_instance().playSound("Hit");
+                isHoveredFirstTime = false;
+                shape.setFillColor(hoverColor);
+            }
+            buttonState = ButtonState::Hover;
         }
     } else {
+        if (buttonState != ButtonState::Idle) {
+            shape.setFillColor(idleColor);
+        }
+        buttonState = ButtonState::Idle;
         isHoveredFirstTime = true;
     }
-
-    switch (state) {
-        case ButtonState::Idle:
-            shape.setFillColor(idleColor);
-            break;
-        case ButtonState::Hover:
-            shape.setFillColor(hoverColor);
-            break;
-        case ButtonState::Active:
-            shape.setFillColor(activeColor);
-            break;
-        case ButtonState::Down:
-            if (buttonState != ButtonState::Down) {
-                AudioManager::get_instance().playSoundEffect("buttonClick");
-            }
-            shape.setFillColor(activeColor);
-            break;
-    }
-
-    buttonState = state;
 }
 
 void Button::render() {
     Renderer::queue(&shape);
     Renderer::queue(&text);
-}
-
-bool Button::isPressed() const {
-    return buttonState == ButtonState::Active;
 }

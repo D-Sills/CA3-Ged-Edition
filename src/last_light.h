@@ -8,5 +8,4 @@ extern TestScene testScene;
 extern MenuScene menuScene;
 extern sf::RenderWindow window;
 
-extern int volume;
 extern sf::Vector2i resolution;

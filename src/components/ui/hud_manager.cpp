@@ -1,13 +1,13 @@
 #include "hud_manager.h"
-#include "engine/scene.h"
-#include "engine/system_resources.h"
-#include "engine/engine.h"
+#include "../../engine/scene.h"
+#include "../../engine/system_resources.h"
+#include "../../engine/engine.h"
 
 HUDManager::HUDManager(Entity* p): Component(p) {
     // Initialize HUD elements
     Engine::GetWindow().setMouseCursorVisible(false);
 
-    _healthBar = _parent->addComponent<UIBarComponent>(sf::Vector2f(200, 200), sf::Color::Green);
+    _healthBar = _parent->addComponent<UIBarComponent>(sf::Vector2f(10,10) ,sf::Vector2f(500, 50), sf::Color::Green);
 
     _crosshair = _parent->addComponent<SpriteComponent>();
     _crosshair->setTexture(Resources::load<sf::Texture>("crosshair.png"));
@@ -43,9 +43,9 @@ void HUDManager::setTimer(float time) {
     int minutes = time / 60;
     int seconds = time - (minutes * 60);
     std::string timeString = std::to_string(minutes) + ":" + std::to_string(seconds);
-    _timerText->SetText(timeString);
+    _timerText->setText(timeString);
 }
 
 void HUDManager::setScore(int score) {
-    _scoreText->SetText("Score: " + std::to_string(score));
+    _scoreText->setText("Score: " + std::to_string(score));
 }

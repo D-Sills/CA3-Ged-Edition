@@ -7,6 +7,7 @@
 #include <future>
 #include <iostream>
 #include "scene.h"
+#include "../audio_manager.h"
 
 using namespace sf;
 using namespace std;
@@ -43,6 +44,7 @@ void Engine::Update() {
 		Physics::update(dt);
 		_activeScene->Update(dt);
 	}
+    AudioManager::get_instance().update(dt);
 }
 
 void Engine::Render(RenderWindow& window) {
@@ -64,6 +66,8 @@ void Engine::Start(unsigned int width, unsigned int height,
 	_window = &window;
 	Renderer::initialise(window);
     Physics::initialise();
+    AudioManager::get_instance().init();
+    AudioManager::get_instance().setMasterVolume(100);
 	ChangeScene(scn);
 
 	while (window.isOpen()) {

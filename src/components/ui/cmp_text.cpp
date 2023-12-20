@@ -21,13 +21,20 @@ TextComponent::TextComponent(Entity* const p, float x, float y, const std::strin
 		_text.getLocalBounds().top + _text.getLocalBounds().height / 2.0f);
 }
 
-void TextComponent::SetText(const std::string& str) {
+void TextComponent::setText(const std::string& str) {
 	_text.setString(str);
 }
 
-void TextComponent::setTextSize(int size)
-{
+void TextComponent::setTextSize(int size) {
 	_text.setCharacterSize(size);
 	_text.setOrigin(_text.getLocalBounds().left + _text.getLocalBounds().width / 2.0f,
 		_text.getLocalBounds().top + _text.getLocalBounds().height / 2.0f);
+}
+
+void TextComponent::setColor(sf::Color color) {
+    _text.setFillColor(color);
+}
+
+void TextComponent::setPosition(sf::Vector2f pos){
+    _text.setPosition(pos);
 }

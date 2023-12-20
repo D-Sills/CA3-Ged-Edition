@@ -13,8 +13,10 @@ public:
 
 	~TextComponent() override = default;
 
-	void SetText(const std::string& str);
+	void setText(const std::string& str);
 	void setTextSize(int sizeOfText);
+    void setColor(sf::Color color);
+    void setPosition(sf::Vector2f pos);
 
 protected:
 	std::shared_ptr<sf::Font> _font;

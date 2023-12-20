@@ -1,12 +1,8 @@
 #include "../last_light.h"
-#include "../components/cmp_character_controller.h"
-
-#include "../components/cmp_sprite.h"
-#include <LevelSystem.h>
+#include "../components/ui/hud_manager.h"
+#include "../characters/player.h"
 #include "../engine/system_resources.h"
-#include "../player/player.h"
 #include "scene_test.h"
-#include <SFML/System.hpp>
 #include <SFML/Graphics.hpp>
 using namespace std;
 using namespace sf;
@@ -20,15 +16,14 @@ void TestScene::Load() {
     // Player Variables
     gameView = Engine::GetWindow().getDefaultView();
     gameView.reset(sf::FloatRect(0, 0, Engine::GetWindow().getSize().x, Engine::GetWindow().getSize().y));
-    Engine::setView(gameView);
     player = makeEntity();
     auto p = player->addComponent<Player>();
     player->setPosition({static_cast<float>(Engine::GetWindow().getSize().x / 2), static_cast<float>(Engine::GetWindow().getSize().y / 2)});
+    gameView.setCenter(player->getPosition());
 
     //HUD Variables
     uiView = Engine::GetWindow().getDefaultView();
     uiView.reset(sf::FloatRect(0, 0, Engine::GetWindow().getSize().x, Engine::GetWindow().getSize().y));
-    Engine::setView(uiView);
     hudManager = makeUiEntity();
     auto h = hudManager->addComponent<HUDManager>();
 

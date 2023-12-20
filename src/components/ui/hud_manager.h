@@ -2,9 +2,9 @@
 #include <memory>
 #include <SFML/Graphics.hpp>
 #include <ecm.h>
-#include "components/ui/cmp_bar.h"
-#include "components/ui/cmp_text.h"
-#include "components/cmp_sprite.h"
+#include "cmp_bar.h"
+#include "cmp_text.h"
+#include "../cmp_sprite.h"
 
 
 class HUDManager : public Component {

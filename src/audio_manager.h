@@ -1,31 +1,31 @@
 #pragma once
 #include <SFML/Audio.hpp>
-#include <string>
 #include <unordered_map>
-#include <memory>
+#include <string>
 
 class AudioManager {
 public:
     static AudioManager& get_instance();
 
-    bool loadMusic(const std::string& filename);
-    void playMusic(const std::string& filename);
-    void pauseMusic();
-    void stopMusic();
-    void setMusicVolume(float new_volume);
-    float getMusicVolume() const;
-    bool isMusicPlaying() const;
-
-    void loadSoundEffect(const std::string& name, const std::string& filename);
-    void playSoundEffect(const std::string& name);
-    void setSoundEffectVolume(const std::string& name, float volume);
-    void setGlobalSoundEffectVolume(float volume);
+    void init(); // Modified initialization method
+    void playSound(const std::string& name);
+    void playMusic(const std::string& name, bool loop = false, float fadeInDuration = 0.0f);
+    void stopMusic(float fadeOutDuration = 0.0f);
+    void setMasterVolume(float volume);
+    void update(float dt); // For handling fade in/out
 
 private:
-    AudioManager();
-    std::shared_ptr<sf::Music> music;
-    float musicVolume;
+    AudioManager() = default;
     std::unordered_map<std::string, sf::SoundBuffer> soundBuffers;
     std::unordered_map<std::string, sf::Sound> sounds;
-    float globalSoundVolume;
+    sf::Music currentMusic;
+    float masterVolume;
+    float musicVolume; // Separate control for music volume
+    bool fadingMusic;
+    float fadeDuration;
+    float fadeTimer;
+    bool fadingIn;
+
+    void loadSoundsFromDirectory(const std::string& directory);
 };
+

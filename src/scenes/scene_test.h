@@ -3,8 +3,6 @@
 #include "../engine/engine.h"
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
-#include "../player/player.h"
-#include "../hud_manager.h"
 #include "../zombie_factory.h"
 
 class TestScene : public Scene {
