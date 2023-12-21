@@ -11,12 +11,12 @@
 class Box2DContactListener : public b2ContactListener {
     void BeginContact(b2Contact *contact) override {
         // Retrieve the entities involved in the contact
-        auto *bodyUserDataA = contact->GetFixtureA()->GetBody()->GetUserData();
-        auto *bodyUserDataB = contact->GetFixtureB()->GetBody()->GetUserData();
+        auto* bodyUserDataA = contact->GetFixtureA()->GetBody()->GetUserData();
+        auto* bodyUserDataB = contact->GetFixtureB()->GetBody()->GetUserData();
 
         if (bodyUserDataA && bodyUserDataB) {
-            auto *entityA = static_cast<Entity *>(bodyUserDataA);
-            auto *entityB = static_cast<Entity *>(bodyUserDataB);
+            auto* entityA = static_cast<Entity*>(bodyUserDataA);
+            auto* entityB = static_cast<Entity*>(bodyUserDataB);
 
             entityA->onCollision(entityB);
             entityB->onCollision(entityA);

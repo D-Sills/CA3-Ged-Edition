@@ -7,7 +7,6 @@
 #include "../components/cmp_character.h"
 #include "../components/ai/cmp_ai_chase.h"
 #include "../components/cmp_animator.h"
-#include "../components/cmp_collider.h"
 
 class Zombie : public Component{
 private:
@@ -17,10 +16,16 @@ private:
     std::shared_ptr<CharacterComponent> _character;
     std::shared_ptr<ZombieAIComponent> _pathfinding;
     std::shared_ptr<SpriteComponent> _spriteComp;
-    std::shared_ptr<ColliderComponent> _collider;
     std::shared_ptr<CharacterControllerComponent> _controller;
+    b2Body* _body;
+
 public:
     explicit Zombie(Entity* p);
+
+    void onCollisionEnter(Entity* other) const;
+
+    void setOnRelease(const std::function<void()>& onRelease);
+    std::function<void()> _onRelease;
 
     void init();
     void update(double dt) override;

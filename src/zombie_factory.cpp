@@ -49,10 +49,6 @@ void ZombieSpawner::configureZombie(Entity* zombie) {
     auto z = zombie->get_components<Zombie>()[0];
     z->init();
 
-    auto zombiePos = zombie->getPosition();
-
-    auto pathfinding = zombie->get_components<PathfindingComponent>()[0];
-    //pathfinding->requestPath(playerPos);
 
 }
 

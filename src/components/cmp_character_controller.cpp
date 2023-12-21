@@ -5,12 +5,7 @@
 using namespace sf;
 using namespace std;
 
-CharacterControllerComponent::CharacterControllerComponent(Entity* p, const b2BodyDef& bodyDef, const b2FixtureDef& fixtureDef) : Component(p),_direction(Direction::Down) {
-    _body = Physics::GetWorld()->CreateBody(&bodyDef);
-    _body->CreateFixture(&fixtureDef);
-    _body->SetUserData(p);
-    _body->SetLinearDamping(5);
-}
+CharacterControllerComponent::CharacterControllerComponent(Entity* p, b2Body *body) : Component(p), _direction(Direction::Down), _body(body) {}
 
 void CharacterControllerComponent::move(const sf::Vector2f& p) {
     _moveDirection += b2Vec2(p.x, p.y);
@@ -18,20 +13,18 @@ void CharacterControllerComponent::move(const sf::Vector2f& p) {
 
 void CharacterControllerComponent::update(double dt) {
     if (_moveDirection.LengthSquared() > 0) {
-    // Normalize if diagonal movement to prevent faster speed
-    _moveDirection.Normalize();
-    auto vel = b2Vec2(_moveDirection.x * _speed, _moveDirection.y * _speed);
-    _body->SetLinearVelocity(vel);
-    // Reset the move direction after applying the velocity
-    _moveDirection = b2Vec2(0, 0);
+        // Normalize if diagonal movement to prevent faster speed
+        _moveDirection.Normalize();
+        auto vel = b2Vec2(_moveDirection.x * _speed, _moveDirection.y * _speed);
+        _body->SetLinearVelocity(vel);
+        // Reset the move direction after applying the velocity
+        _moveDirection = b2Vec2(0, 0);
     } else {
-    // Stop movement when there is no move command
-    _body->SetLinearVelocity(b2Vec2(0, 0));
+        // Stop movement when there is no move command
+        _body->SetLinearVelocity(b2Vec2(0, 0));
     }
 
-    // Update parent's position from physics body
-    auto pos = _body->GetPosition();
-    _parent->setPosition(sf::Vector2f(pos.x * Physics::PIXEL_PER_METER, pos.y * Physics::PIXEL_PER_METER));
+    _parent->setPosition(Vector2f(_body->GetPosition().x * Physics::PIXEL_PER_METER, _body->GetPosition().y * Physics::PIXEL_PER_METER));
 }
 
 void CharacterControllerComponent::setSpeed(float speed) {

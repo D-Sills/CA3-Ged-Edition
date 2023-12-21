@@ -14,7 +14,7 @@ private:
 public:
     void move(const sf::Vector2f& p);
 
-    explicit CharacterControllerComponent(Entity* p,  const b2BodyDef& bodyDef, const b2FixtureDef& fixtureDef);
+    explicit CharacterControllerComponent(Entity* p,  b2Body *body);
     CharacterControllerComponent() = delete;
 
 	void setSpeed(float speed);

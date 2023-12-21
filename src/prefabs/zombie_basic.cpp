@@ -14,12 +14,9 @@ Zombie::Zombie(Entity* p)
         : Component(p) {
 }
 
-void Zombie::update(double dt) {
-}
+void Zombie::update(double dt) {}
 
-void Zombie::render() {
-    //_player->render();
-}
+void Zombie::render() {}
 
 void Zombie::init() {
     std::cout << "Zombie init" << std::endl;
@@ -44,16 +41,17 @@ void Zombie::init() {
     fixtureDef.density = 1.0f;
     fixtureDef.friction = 0.3f;
 
+    _body = Physics::GetWorld()->CreateBody(&bodyDef);
+    _body->CreateFixture(&fixtureDef);
+    _body->SetUserData(_parent);
+    _body->SetLinearDamping(1);
 
+    _parent->setOnCollision([this](Entity* e) { onCollisionEnter(e); });
 
-    _collider = _parent->addComponent<ColliderComponent>(bodyDef, fixtureDef);
-
-    // Add a Character Movement Component
     _pathfinding = _parent->addComponent<ZombieAIComponent>(10, 5);
 
-    _controller = _parent->addComponent<CharacterControllerComponent>(bodyDef, fixtureDef);
+    _controller = _parent->addComponent<CharacterControllerComponent>(_body);
 
-    // Add a Character Component
     _character = _parent->addComponent<CharacterComponent>();
 
     // Load from CSV
@@ -65,4 +63,12 @@ void Zombie::init() {
     _character->setHealth(10);
     _character->setDamage(10);
 
+}
+
+void Zombie::onCollisionEnter(Entity *other) const {
+    if (other->hasTag("bullet")) {
+        if (_onRelease) {
+            _onRelease();
+        }
+    }
 }

@@ -69,6 +69,10 @@ void Entity::setForDelete() {
 	_visible = false;
 }
 
+bool Entity::hasTag(const std::string& t) const {
+    return _tags.find(t) != _tags.end();
+}
+
 bool Entity::isVisible() const { return _visible; }
 
 void Entity::setVisible(bool _visible) { Entity::_visible = _visible; }
@@ -79,12 +83,14 @@ Entity::~Entity() {
 	_components.clear();
 }
 
-void Entity::setOnCollision(std::function<void(std::shared_ptr<Entity>)> func) {
+void Entity::setOnCollision(std::function<void(Entity*)> func) {
     _onCollision = std::move(func);
 }
 
-void Entity::onCollision(Entity *other) const {
-
+void Entity::onCollision(Entity* other) const {
+    if (_onCollision) {
+        _onCollision(other);
+    }
 }
 
 Component::~Component() = default;

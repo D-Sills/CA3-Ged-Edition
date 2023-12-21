@@ -20,7 +20,7 @@ HUDManager::HUDManager(Entity* p): Component(p) {
     _waveText->setTextSize(30);
 
     // Score Text - Top Right
-    _scoreText = _parent->addComponent<TextComponent>(Engine::GetWindow().getSize().x - 10, 10, "0", "resident_evil_4_remake_font_by_snakeyboy_df7kacs.ttf");
+    _scoreText = _parent->addComponent<TextComponent>(Engine::GetWindow().getSize().x + 10, 10, "0", "resident_evil_4_remake_font_by_snakeyboy_df7kacs.ttf");
     _scoreText->setTextSize(30);
 
     // Weapon Icon - Bottom Right
@@ -32,13 +32,13 @@ HUDManager::HUDManager(Entity* p): Component(p) {
     _ammoText->setTextSize(30);
 }
 
-void HUDManager::updateValues(float health, int ammo, float time, int score, int wave) {
+void HUDManager::updateValues(float health, int ammo, int maxAmmo, float time, int score, int wave) {
     // Update HUD elements
     setHealth(health);
     setTimer(time);
     setScore(score);
     setWave(wave);
-    setAmmo(ammo);
+    setAmmo(ammo, maxAmmo);
 }
 
 void HUDManager::setHealth(float health) {

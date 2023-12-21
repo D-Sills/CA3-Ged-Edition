@@ -48,6 +48,9 @@ struct EntityManager {
 class Entity {
 	friend struct EntityManager;
 
+private:
+    std::function<void(Entity*)> _onCollision;
+
 protected:
 	std::vector<std::shared_ptr<Component>> _components;
 	sf::Vector2f _position;
@@ -57,22 +60,25 @@ protected:
 	bool _fordeletion; // should be deleted
 	std::set<std::string> _tags;
 
+
 public:
 	void addTag(const std::string& t);
 	const std::set<std::string>& getTags() const;
+    bool hasTag(const std::string& t) const;
 	Scene* const scene;
 	Entity(Scene* const s);
 	Entity(const Entity& ent);
 	virtual ~Entity();
+
+
 
 	virtual void update(double dt);
 
 	virtual void render();
 
     // oncollision is set from the collision component
-    void setOnCollision(std::function<void(std::shared_ptr<Entity>)> func);
+    void setOnCollision(std::function<void(Entity*)> func);
     void onCollision(Entity *other) const;
-    std::function<void(std::shared_ptr<Entity>)> _onCollision = nullptr;
 
 	//
 	const sf::Vector2f& getPosition() const;
@@ -131,4 +137,6 @@ public:
 		}
 		return ret;
 	}
+
+    void shared_from_this() const;
 };

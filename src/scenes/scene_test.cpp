@@ -68,9 +68,10 @@ void TestScene::Update(const double& dt) {
         ecm.update(dt);
         ui_ecm.update(dt);
 
-        //auto p = player->get_components<Player>()[0].;
-        //p.
-        //hudManager->get_components<HUDManager>()[0]->updateValues(
+        auto p = player->get_components<CharacterComponent>()[0];
+        auto h = hudManager->get_components<HUDManager>()[0];
+
+        h->updateValues(p->getHealth(), 2, 77, 1233, 65656, 4);
 	}
 
     if (Keyboard::isKeyPressed(Keyboard::Enter)) {

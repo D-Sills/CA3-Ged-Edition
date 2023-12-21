@@ -10,8 +10,8 @@ class ObjectPool {
 public:
     explicit ObjectPool(size_t size);
     std::shared_ptr<Entity> acquireObject();
-    void releaseObject(std::shared_ptr<Entity> object);
-    void forEach(std::function<void(std::shared_ptr<Entity>)> func);
+    void releaseObject(const std::shared_ptr<Entity>& entity);
+    void forEach(const std::function<void(std::shared_ptr<Entity>)>& func);
     std::vector<std::shared_ptr<Entity>> getPool() {
         return pool;
     }
@@ -30,7 +30,7 @@ ObjectPool<T>::ObjectPool(size_t size) : pool(size), available(size, true) {
         auto entity = Engine::_activeScene->makeEntity();
         entity->template addComponent<T>();
         pool[i] = entity;
-
+        pool[i]->setVisible(false);
     }
 }
 
@@ -39,6 +39,7 @@ std::shared_ptr<Entity> ObjectPool<T>::acquireObject() {
     for (size_t i = 0; i < pool.size(); ++i) {
         if (available[i]) {
             available[i] = false;
+            pool[i]->setVisible(true);
             return pool[i]; // Returns the Entity with the component attached
         }
     }
@@ -47,18 +48,19 @@ std::shared_ptr<Entity> ObjectPool<T>::acquireObject() {
 
 
 template <typename T>
-void ObjectPool<T>::releaseObject(std::shared_ptr<Entity> entity) {
+void ObjectPool<T>::releaseObject(const std::shared_ptr<Entity>& entity) {
     auto it = std::find(pool.begin(), pool.end(), entity);
     if (it != pool.end()) {
         size_t index = std::distance(pool.begin(), it);
         available[index] = true;
+        entity->setVisible(false);
         //entity->setForDelete();
     }
 }
 
 
 template <typename T>
-void ObjectPool<T>::forEach(std::function<void(std::shared_ptr<Entity>)> func) {
+void ObjectPool<T>::forEach(const std::function<void(std::shared_ptr<Entity>)>& func) {
     for (auto& entity : pool) {
         if (!available[std::distance(pool.begin(), std::find(pool.begin(), pool.end(), entity))]) {
             func(entity); // Apply the function to the Entity
