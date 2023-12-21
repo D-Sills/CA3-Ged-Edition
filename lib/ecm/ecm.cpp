@@ -76,9 +76,15 @@ void Entity::setVisible(bool _visible) { Entity::_visible = _visible; }
 Component::Component(Entity* const p) : _parent(p), _fordeletion(false) {}
 
 Entity::~Entity() {
-
-
 	_components.clear();
+}
+
+void Entity::setOnCollision(std::function<void(std::shared_ptr<Entity>)> func) {
+    _onCollision = std::move(func);
+}
+
+void Entity::onCollision(Entity *other) const {
+
 }
 
 Component::~Component() = default;

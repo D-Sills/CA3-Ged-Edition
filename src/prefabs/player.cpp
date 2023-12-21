@@ -21,7 +21,7 @@ Player::Player(Entity* p): Component(p) {
 
     // Add a Collider Component
     b2BodyDef bodyDef;
-    bodyDef.type = b2_kinematicBody;  // Change as needed
+    bodyDef.type = b2_dynamicBody;  // Change as needed
     bodyDef.position.Set(_parent->getPosition().x / Physics::PIXEL_PER_METER , _parent->getPosition().y / Physics::PIXEL_PER_METER);
     b2PolygonShape dynamicBox;
     dynamicBox.SetAsBox(32.0f / Physics::PIXEL_PER_METER, 32.0f / Physics::PIXEL_PER_METER);  // Change as needed
@@ -74,7 +74,7 @@ void Player::update(double dt) {
         _controller->move(Vector2f(1, 0));
     }
 
-    std::cout << "Player position: " << _parent->getPosition().x << ", " << _parent->getPosition().y << std::endl;
+    //std::cout << "Player position: " << _parent->getPosition().x << ", " << _parent->getPosition().y << std::endl;
     // Calculate the position of the mouse relative to the world
     auto mousePosWindow = Mouse::getPosition(Engine::GetWindow()); // Mouse position relative to the window
     auto mousePosView = Engine::GetWindow().mapPixelToCoords(mousePosWindow); // Convert to world coordinates

@@ -12,7 +12,9 @@ public:
     std::shared_ptr<Entity> acquireObject();
     void releaseObject(std::shared_ptr<Entity> object);
     void forEach(std::function<void(std::shared_ptr<Entity>)> func);
-
+    std::vector<std::shared_ptr<Entity>> getPool() {
+        return pool;
+    }
 
 private:
     std::vector<std::shared_ptr<Entity>> pool;
@@ -28,6 +30,7 @@ ObjectPool<T>::ObjectPool(size_t size) : pool(size), available(size, true) {
         auto entity = Engine::_activeScene->makeEntity();
         entity->template addComponent<T>();
         pool[i] = entity;
+
     }
 }
 

@@ -1,6 +1,6 @@
 #include "LevelSystem.h"
 #include <fstream>
-
+#include <memory>
 using namespace std;
 using namespace sf;
 
@@ -196,6 +196,9 @@ void LevelSystem::buildSprites(bool optimise) {
 
 	cout << "Level with " << (_width * _height) << " Tiles, With " << nonempty
 		<< " Not Empty, using: " << _sprites.size() << " Sprites\n";
+
+    auto PIXEL_PER_METER = 32.0f;
+
 }
 
 void LevelSystem::render(RenderWindow& window) {
@@ -272,7 +275,7 @@ bool LevelSystem::isOnGrid(sf::Vector2f v) {
 
 void LevelSystem::setOffset(const Vector2f& _offset) {
 	LevelSystem::_offset = _offset;
-	buildSprites();
+	//buildSprites();
 }
 
 void LevelSystem::unload() {

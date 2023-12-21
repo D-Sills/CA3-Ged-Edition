@@ -11,20 +11,9 @@ ProjectileEmitterComponent::ProjectileEmitterComponent(Entity *p,float fireRate,
 
 void ProjectileEmitterComponent::update(double dt) {
     _timeSinceLastFire += dt;
-
-    // Update projectiles
-    _projectilePool.forEach([dt](auto proj) {
-        proj->update(dt);
-    });
 }
 
-void ProjectileEmitterComponent::render() {
-    _projectilePool.forEach([](auto proj) {
-        if (proj->isVisible()) {
-            proj->render();
-        }
-    });
-}
+void ProjectileEmitterComponent::render() {}
 
 bool ProjectileEmitterComponent::fireProjectile(const sf::Vector2f& position, float angle) {
     if (_timeSinceLastFire < _fireRate) return false;
@@ -37,7 +26,6 @@ bool ProjectileEmitterComponent::fireProjectile(const sf::Vector2f& position, fl
         _timeSinceLastFire = 0.0f;
         return true;
     }
-
     return false;
 }
 

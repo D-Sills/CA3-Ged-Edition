@@ -2,16 +2,16 @@
 
 #include <SFML/Graphics.hpp>
 #include <maths.h>
-#include <memory>
+
 #include <string>
 #include <vector>
 #include <map>
+#include <Box2D/Box2D.h>
 
-#define ls LevelSystem
 
 class LevelSystem {
 public:
-	static void loadLevelFile(const std::string&, float tileSize = 100.0f);
+	static void loadLevelFile(const std::string&, float tileSize);
 	static void unload();
 	static void render(sf::RenderWindow& window);
 

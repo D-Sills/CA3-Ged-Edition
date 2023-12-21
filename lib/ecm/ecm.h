@@ -5,12 +5,16 @@
 #include <set>
 #include <typeindex>
 #include <vector>
+#include <functional>
 
 class Entity;
 class Scene;
 
 class Component {
 	friend Entity;
+
+    class CollisionComponent;
+        friend Entity;
 
 protected:
     bool _fordeletion; // should be removed
@@ -65,8 +69,10 @@ public:
 
 	virtual void render();
 
-    virtual void onCollision(Entity* other) {
-    }
+    // oncollision is set from the collision component
+    void setOnCollision(std::function<void(std::shared_ptr<Entity>)> func);
+    void onCollision(Entity *other) const;
+    std::function<void(std::shared_ptr<Entity>)> _onCollision = nullptr;
 
 	//
 	const sf::Vector2f& getPosition() const;

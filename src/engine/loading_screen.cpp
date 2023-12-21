@@ -50,6 +50,8 @@ void LoadingScreen::Render() {
     Renderer::queue(&background);
     Renderer::queue(&t);
     Renderer::queue(&octagon);
+
+    Renderer::render();
 }
 
 void LoadingScreen::Load() {

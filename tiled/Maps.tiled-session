@@ -8,10 +8,18 @@
         "."
     ],
     "fileStates": {
+        "bunker.tsx": {
+            "scaleInDock": 1
+        }
     },
+    "last.exportedFilePath": "D:/Documents/GitHub/C++ CA3 Ged Edition/res/levels",
+    "map.height": 30,
+    "map.lastUsedExportFilter": "CSV files (*.csv)",
+    "map.width": 30,
     "openFiles": [
     ],
     "project": "Maps.tiled-project",
     "recentFiles": [
-    ]
+    ],
+    "tileset.lastUsedFormat": "tsx"
 }

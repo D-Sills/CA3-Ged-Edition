@@ -3,8 +3,11 @@
 #include "../engine/system_resources.h"
 #include "../components/ui/cmp_text.h"
 #include "../audio_manager.h"
+#include "../engine/system_renderer.h"
+#include "../components/cmp_sprite.h"
 
 using namespace std;
+using namespace sf;
 
 void MenuScene::Load() {
     AudioManager::get_instance().playMusic("Cold-Moon.ogg", true, 0.5f);
@@ -48,6 +51,7 @@ void MenuScene::Render() {
     if (!isLoaded()) return;
 
     ui_ecm.render();
+    Renderer::render();
 }
 
 void MenuScene::startGame() {

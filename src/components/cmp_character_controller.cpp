@@ -9,7 +9,7 @@ CharacterControllerComponent::CharacterControllerComponent(Entity* p, const b2Bo
     _body = Physics::GetWorld()->CreateBody(&bodyDef);
     _body->CreateFixture(&fixtureDef);
     _body->SetUserData(p);
-    _body->SetLinearDamping(1);
+    _body->SetLinearDamping(5);
 }
 
 void CharacterControllerComponent::move(const sf::Vector2f& p) {

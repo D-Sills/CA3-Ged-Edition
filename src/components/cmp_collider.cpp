@@ -1,22 +1,16 @@
-#include <functional>
 #include "cmp_collider.h"
-#include "../engine/system_physics.h"
 
 ColliderComponent::ColliderComponent(Entity* p, const b2BodyDef& bodyDef, const b2FixtureDef& fixtureDef)
         : Component(p) {
-      // Set user data to point to the parent entity
+      _parent->setOnCollision([this](const std::shared_ptr<Entity>& e) {
+        onCollisionEnter(e);
+      });
 }
 
-void ColliderComponent::update(double dt) {
-    // Update entity position to match the physics body
-
+void ColliderComponent::onCollisionEnter(const std::shared_ptr<Entity>& e) {
+    e->setAlive(false);
 }
 
-b2Body* ColliderComponent::getBody() const {
-    return _body.get();
-}
 
-void ColliderComponent::onCollisionEnter(std::function<void(Entity*)> callback) {
-    _onCollisionEnter = callback;
 
-}
+

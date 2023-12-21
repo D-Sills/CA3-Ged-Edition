@@ -15,9 +15,10 @@ private:
     std::shared_ptr<sf::Texture> _attack;
 
     std::shared_ptr<CharacterComponent> _character;
-    std::shared_ptr<ZombieAIComponent> _controller;
+    std::shared_ptr<ZombieAIComponent> _pathfinding;
     std::shared_ptr<SpriteComponent> _spriteComp;
     std::shared_ptr<ColliderComponent> _collider;
+    std::shared_ptr<CharacterControllerComponent> _controller;
 public:
     explicit Zombie(Entity* p);
 

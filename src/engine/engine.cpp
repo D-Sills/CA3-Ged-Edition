@@ -55,7 +55,7 @@ void Engine::Render(RenderWindow& window) {
 		_activeScene->Render();
 	}
 
-	Renderer::render();
+	//Renderer::render(); // that drop pod project was garbage
 }
 
 void Engine::Start(unsigned int width, unsigned int height,
@@ -120,7 +120,7 @@ void Engine::ChangeScene(Scene* s) {
 	if (!s->isLoaded()) {
 		cout << "Eng: Entering Loading Screen\n";
 
-        //LoadingScreen::Load();
+        LoadingScreen::Load();
         _activeScene->LoadAsync();
 	}
 }

@@ -75,7 +75,7 @@ target_include_directories(lib_csv_reader INTERFACE "${CMAKE_SOURCE_DIR}/lib/csv
 # Linking libraries
 target_link_libraries(LastLight PRIVATE sfml-graphics sfml-audio Box2D lib_ecm lib_maths lib_tile_level_loader lib_csv_reader lib_astar)
 target_link_libraries(lib_ecm sfml-graphics lib_maths)
-target_link_libraries(lib_tile_level_loader sfml-graphics lib_maths)
+target_link_libraries(lib_tile_level_loader sfml-graphics lib_maths Box2D)
 
 # Installation (if needed)
 install(TARGETS LastLight)

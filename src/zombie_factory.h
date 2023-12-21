@@ -2,7 +2,7 @@
 
 #include "ecm.h"
 #include "object_pool.h"
-#include "characters/zombie_basic.h"
+#include "prefabs/zombie_basic.h"
 #include <SFML/Graphics.hpp>
 #include <random>
 #include <functional>
