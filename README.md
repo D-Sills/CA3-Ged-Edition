@@ -1,5 +1,7 @@
 # Last Light - Technical Documentation
 
+[Code Walkthrough Video](https://youtu.be/3Jg8NzV7gEI)
+
 ## Table of Contents
 - [Introduction](#introduction)
 - [Component-Based Architecture](#component-based-architecture)
