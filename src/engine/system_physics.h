@@ -6,6 +6,12 @@
 #include "../collision_listener.h"
 
 namespace Physics {
+    inline static std::shared_ptr<b2World> world;
+    inline const int32 velocityIterations = 8;
+    inline const int32 positionIterations = 3;
+    inline Box2DContactListener contactListenerInstance;
+    inline std::vector<b2Body*> destructionQueue;
+
 	void initialise();
 	void shutdown();
 	void update(const double&);

@@ -101,7 +101,7 @@ void TestScene::Render() {
     if (!isLoaded()) return;
 
     Engine::setView(gameView);
-    //LEVELSYSTEM::render(Engine::GetWindow());
+    //LevelSystem::render(Engine::GetWindow());
     ecm.render();
     Renderer::render();
 
