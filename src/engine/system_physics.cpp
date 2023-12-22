@@ -8,6 +8,7 @@ namespace Physics {
 	const int32 velocityIterations = 8;
     const int32 positionIterations = 3;
     Box2DContactListener contactListenerInstance;
+    std::vector<b2Body*> destructionQueue;
 
 	void initialise() {
 		b2Vec2 gravity(0.0f, 0.0f);
@@ -22,6 +23,20 @@ namespace Physics {
 	}
 
 	std::shared_ptr<b2World> GetWorld() { return world; }
+
+    void markBodyForDestruction(b2Body* body) {
+        destructionQueue.push_back(body);
+    }
+
+    void processDestructionQueue() {
+        for (auto& body : destructionQueue) {
+            if (body) {
+                world->DestroyBody(body);
+                body = nullptr;
+            }
+        }
+        destructionQueue.clear();
+    }
 
 	const Vector2f bv2_to_sv2(const b2Vec2& in, bool scale) {
 		if (scale) {

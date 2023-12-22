@@ -6,22 +6,24 @@
 #include "../last_light.h"
 #include "maths.h"
 #include "../engine/system_physics.h"
+#include "../components/cmp_projectile.h"
+#include "player.h"
+#include "../audio_manager.h"
+#include "pickup.h"
 
 using namespace std;
 using namespace sf;
 
 Zombie::Zombie(Entity* p)
         : Component(p) {
+    _parent->setVisible(false);
+    _parent->addTag("enemy");
+    _parent->setPosition(sf::Vector2f (10000, 10000));
 }
 
-void Zombie::update(double dt) {}
-
-void Zombie::render() {}
-
 void Zombie::init() {
-    std::cout << "Zombie init" << std::endl;
-    _parent->addTag("enemy");
-    //_parent->setPosition(sf::Vector2f (10000, 10000));
+    _parent->setVisible(true);
+    //
     // Add a Sprite Component
     _spriteComp = _parent->addComponent<SpriteComponent>();
     auto tex = Resources::load<Texture>("crawler.png");
@@ -65,10 +67,70 @@ void Zombie::init() {
 
 }
 
-void Zombie::onCollisionEnter(Entity *other) const {
-    if (other->hasTag("bullet")) {
-        if (_onRelease) {
-            _onRelease();
-        }
+void Zombie::update(double dt) {}
+
+void Zombie::render() {}
+
+void Zombie::setOnRelease(const std::function<void()>& onRelease) {
+    _onRelease = onRelease;
+}
+
+void Zombie::die() {
+    AudioManager::get_instance().playSound("zombie death scream");
+    AudioManager::get_instance().playSound("zombie death");
+    // give player xp
+    auto player = Engine::_activeScene->getEcm().find("player")[0];
+    auto p = player->get_components<Player>()[0];
+    p->applyPickup(_xpValue, PickupType::XP);
+    dropPickup();
+
+    // spawn blood, should object pool this
+    auto blood = Engine::_activeScene->makeEntity();
+    blood->setPosition(_parent->getPosition());
+    auto sprite = blood->addComponent<SpriteComponent>();
+    sprite->setTexture(Resources::load<Texture>("blood.png"));
+
+    if (_onRelease) {
+        _onRelease();
     }
+}
+
+void Zombie::dropPickup() {
+    // 10% chance to drop pickup
+    if (rand() % 10 != 0) return;
+
+    auto pickup = Engine::_activeScene->makeEntity();
+    pickup->setPosition(_parent->getPosition());
+    auto pickupType = static_cast<PickupType>(rand() % 4);
+    auto pickupComp = pickup->addComponent<Pickup>(pickupType);
+    pickupComp->setOnPickup([pickup]() {
+       pickup->setForDelete();
+    });
+}
+
+void Zombie::attack() {}
+
+void Zombie::takeDamage(int damage) {
+    _character->setHealth(_character->getHealth() - damage);
+    AudioManager::get_instance().playSound("hit");
+    AudioManager::get_instance().playSound("zombie hit");
+    if (_character->getHealth() <= 0) {
+        die();
+    }
+}
+
+void Zombie::onCollisionEnter(Entity *other) {
+    if (other->hasTag("bullet")) {
+        auto bullet = other->get_components<ProjectileComponent>()[0];
+        takeDamage(bullet->getDamage());
+    }
+    if (other->hasTag("player")) {
+        auto player = other->get_components<Player>()[0];
+        AudioManager::get_instance().playSound("player take damage");
+        player->takeDamage(_character->getDamage());
+    }
+}
+
+void Zombie::tearDown() {
+    Physics::markBodyForDestruction(_body);
 }

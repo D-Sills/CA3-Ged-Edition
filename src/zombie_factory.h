@@ -17,12 +17,15 @@ public:
     void stopWave();
 
 private:
+    int _waveNumber{};
+    int _enemyCount{};
+
     sf::FloatRect _spawnArea;
     float _spawnInterval;
     float _timer;
     bool _waveActive;
     std::default_random_engine _randomEngine;
-    ObjectPool<Zombie> _zombiePool = ObjectPool<Zombie>(100);
+    ObjectPool<Zombie> _zombiePool;
 
     void configureZombie(Entity* zombie);
     sf::Vector2f getRandomSpawnPosition();

@@ -7,7 +7,7 @@
 
 class ProjectileEmitterComponent : public Component {
 public:
-    ProjectileEmitterComponent(Entity* p, float fireRate, float speed, int damage);
+    explicit ProjectileEmitterComponent(Entity* p);
 
     void update(double dt) override;
     void render() override;
@@ -17,9 +17,10 @@ public:
     void setProjectileDamage(int damage);
 
 private:
-    ObjectPool<ProjectileComponent> _projectilePool = ObjectPool<ProjectileComponent>(100);
+    ObjectPool<ProjectileComponent> _projectilePool;
     float _fireRate = 0.5;
     float _timeSinceLastFire = 100;
-
+    float _speed = 1000;
+    int _damage = 1;
 };
 

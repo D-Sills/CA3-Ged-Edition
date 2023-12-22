@@ -5,18 +5,16 @@
 #include "DataReader.h"
 #include "maths.h"
 #include "../engine/system_physics.h"
+#include "../audio_manager.h"
 
 using namespace std;
 using namespace sf;
 
 Player::Player(Entity* p): Component(p) {
-    // Add a Sprite Component
+    _parent->addTag("player");
+
     _spriteComp = _parent->addComponent<SpriteComponent>();
-    auto tex = Resources::load<Texture>("player.png");
-    if (tex) {
-        std::cout << "Loaded player texture" << std::endl;
-        _spriteComp->setTexture(tex);
-    }
+    _spriteComp->setTexture(Resources::load<Texture>("player.png"));
 
     // Box2D
     b2BodyDef bodyDef;
@@ -44,7 +42,8 @@ Player::Player(Entity* p): Component(p) {
     _character = _parent->addComponent<CharacterComponent>();
 
     // Add a Projectile Emitter Component
-    _projectileEmitter = _parent->addComponent<ProjectileEmitterComponent>(0.5f, 1000.0f, 10);
+    _projectileEmitter = _parent->addComponent<ProjectileEmitterComponent>();
+    switchWeapon(WeaponType::PISTOL);
 
     // Add an Animator Component
     setupAnimations();
@@ -53,26 +52,40 @@ Player::Player(Entity* p): Component(p) {
 
     // Load from CSV
     //auto stats = DataReader::readStatsFromCSV("path/to/file.csv");
-   // auto health = stats["Player"].attributes["health"];
-    //auto speed = stats["Player"].attributes["speed"];
+     //auto health = stats["Player"].attributes["health"];
+     //auto speed = stats["Player"].attributes["speed"];
 
     _controller->setSpeed(5);
     _character->setHealth(50);
     _character->setDamage(10);
-
-    currentBullet = bulletMax;
-
 }
 
 void Player::update(double dt) {
-    //update view on player
+    if (_currentState == PlayerState::DEAD) return;
+    if (_character->getHealth() <= 0) {
+        die();
+    }
+
+    if (invincibilityTimer > 0) {
+        // flash sprite
+        if (invincibilityTimer > 0.4f) {
+            _spriteComp->getSprite().setColor(Color::Transparent);
+        } else if (invincibilityTimer > 0.3f) {
+            _spriteComp->getSprite().setColor(Color::White);
+        } else if (invincibilityTimer > 0.2f) {
+            _spriteComp->getSprite().setColor(Color::Transparent);
+        } else if (invincibilityTimer > 0.1f) {
+            _spriteComp->getSprite().setColor(Color::White);
+        }
+        invincibilityTimer -= dt;
+    }
+
     if (Mouse::isButtonPressed(Mouse::Right)) { // Key to enter aiming mode
         startAiming();
     } else {
         stopAiming();
     }
 
-    //std::cout << "Player position: " << _parent->getPosition().x << ", " << _parent->getPosition().y << std::endl;
     // Calculate the position of the mouse relative to the world
     auto mousePosWindow = Mouse::getPosition(Engine::GetWindow());
     auto mousePosView = Engine::GetWindow().mapPixelToCoords(mousePosWindow);
@@ -87,12 +100,25 @@ void Player::update(double dt) {
         _controller->setSpeed(1);
         if (Mouse::isButtonPressed(Mouse::Left)) {
             // shoot
-            if (currentBullet <= 0) {
+            if (!isReloading || currentWeapon == WeaponType::PISTOL && currentPistolCount <= 0 || currentWeapon == WeaponType::SHOTGUN && currentShotgunCount <= 0 || currentWeapon == WeaponType::RIFLE && currentRifleCount <= 0) {
                 startReloading();
             } else {
                 if (_projectileEmitter->fireProjectile(_parent->getPosition(), angleRadians)) {
-                    std::cout << "Fired projectile" << std::endl;
-                    currentBullet--;
+                    if (currentWeapon == WeaponType::PISTOL) {
+                        AudioManager::get_instance().playSound("pistol shot");
+                    } else if (currentWeapon == WeaponType::SHOTGUN) {
+                        AudioManager::get_instance().playSound("shotgun shot");
+                    } else if (currentWeapon == WeaponType::RIFLE) {
+                        AudioManager::get_instance().playSound("ar shot");
+                    }
+
+                    if (currentWeapon == WeaponType::PISTOL) {
+                        currentPistolCount--;
+                    } else if (currentWeapon == WeaponType::SHOTGUN) {
+                        currentShotgunCount--;
+                    } else if (currentWeapon == WeaponType::RIFLE) {
+                        currentRifleCount--;
+                    }
                 }
             }
         }
@@ -119,13 +145,13 @@ void Player::update(double dt) {
     }
 
     // Handle interaction with a cooldown
-    interactTimer += dt;
-    if (Keyboard::isKeyPressed(Keyboard::E) && interactTimer >= interactCooldown) {
-        _currentState = PlayerState::INTERACTING;
-        interact();
-        interactTimer = 0.0f;
-        _controller->setSpeed(1);
-    }
+    //interactTimer += dt;
+   // if (Keyboard::isKeyPressed(Keyboard::E) && interactTimer >= interactCooldown) {
+   //     _currentState = PlayerState::INTERACTING;
+   //     interact();
+   //     interactTimer = 0.0f;
+   //     _controller->setSpeed(1);
+  //  }
 
     // movement
     if (Keyboard::isKeyPressed(sf::Keyboard::W)) {
@@ -153,6 +179,31 @@ void Player::update(double dt) {
         }
     }
 
+    if (_controller->isMoving()) {
+        footstepTimer += dt;
+        if (footstepTimer >= footstepInterval) {
+            AudioManager::get_instance().playSound("footstep");
+            footstepTimer = 0.0f;
+        }
+    } else {
+        footstepTimer = 0.0f;
+    }
+
+    if (_currentState != PlayerState::RELOADING && _currentState != PlayerState::INTERACTING && _currentState != PlayerState::AIMING) {
+        if (Keyboard::isKeyPressed(Keyboard::Num1) && currentWeapon != WeaponType::PISTOL) {
+            AudioManager::get_instance().playSound("equip pistol");
+            switchWeapon(WeaponType::PISTOL);
+        }
+        if (Keyboard::isKeyPressed(Keyboard::Num2) && currentWeapon != WeaponType::SHOTGUN) {
+            AudioManager::get_instance().playSound("equip shotgun");
+            switchWeapon(WeaponType::SHOTGUN);
+        }
+        if (Keyboard::isKeyPressed(Keyboard::Num3) && currentWeapon != WeaponType::RIFLE) {
+            AudioManager::get_instance().playSound("equip ar");
+            switchWeapon(WeaponType::RIFLE);
+        }
+    }
+
     // Update the animator
     switch (_currentState) {
         case PlayerState::IDLE:
@@ -177,10 +228,18 @@ void Player::startReloading() {
     isReloading = true;
     reloadTimer = 0.0f;
     std::cout << "Reloading..." << std::endl;
+    AudioManager::get_instance().playSound("reload");
 }
 
 void Player::reload() {
-    currentBullet = bulletMax;
+    if (currentWeapon == WeaponType::PISTOL) {
+        pistolAmmo -= pistolAmmoMax - currentPistolCount;
+        currentPistolCount = pistolAmmoMax;
+    } else if (currentWeapon == WeaponType::SHOTGUN) {
+        currentShotgunCount = shotgunAmmoMax;
+    } else if (currentWeapon == WeaponType::RIFLE) {
+        currentRifleCount = rifleAmmoMax;
+    }
     std::cout << "Reloaded" << std::endl;
 }
 
@@ -190,6 +249,7 @@ void Player::interact() {
 }
 
 void Player::startAiming() {
+    AudioManager::get_instance().playSound("aim");
     _currentState = PlayerState::AIMING;
 }
 
@@ -248,8 +308,89 @@ void Player::setupAnimations() {
     _reload = Animation(texture, reloadFrames);
 }
 
-void Player::setState(PlayerState state) {
-    _currentState = state;
+void Player::applyPickup(int amount, PickupType type) {
+    switch (type) {
+        case PickupType::HEALTH:
+            _character->setHealth(_character->getHealth() + amount);
+            break;
+        case PickupType::PISTOL_AMMO:
+            pistolAmmo += amount;
+            break;
+        case PickupType::SHOTGUN_AMMO:
+            shotgunAmmo += amount;
+            break;
+        case PickupType::RIFLE_AMMO:
+            rifleAmmo += amount;
+            break;
+        case PickupType::XP:
+            addXP(amount);
+            break;
+    }
+}
+
+void Player::addXP(float amount) {
+    currentXP += amount;
+    if (currentXP >= 100) {
+        currentXP -= 100;
+        level++;
+        Engine::_gameState = GameStates::UPGRADE;
+        //Engine::_activeScene->getEcm().find("hudManager")[0]->get_components<HUDManager>()[0]->addUpgradePoint();
+    }
+}
+
+void Player::applyUpgrade(float amount, UpgradeType type) {
+    switch (type) {
+        case UpgradeType::HEALTH:
+            _character->setHealth(_character->getHealth() + amount);
+            break;
+        case UpgradeType::SPEED:
+            _controller->setSpeed(_character->getSpeed() + amount);
+            break;
+        case UpgradeType::DAMAGE:
+            _character->setDamage(_character->getDamage() + amount);
+            break;
+    }
+}
+
+void Player::takeDamage(int damage) {
+    if (_currentState == PlayerState::DEAD) return;
+    if (invincibilityTimer > 0) return;
+    _character->setHealth(_character->getHealth() - damage);
+    // set invincibility frames
+    invincibilityTimer = 0.5f;
+    AudioManager::get_instance().playSound("hit");
+    AudioManager::get_instance().playSound("player take damage");
+}
+
+void Player::switchWeapon(WeaponType type) {
+    switch (type) {
+        case WeaponType::PISTOL:
+            currentWeapon = WeaponType::PISTOL;
+            _projectileEmitter->setFireRate(0.5f);
+            _projectileEmitter->setProjectileDamage(10);
+            _projectileEmitter->setProjectileSpeed(500.0f);
+            break;
+        case WeaponType::SHOTGUN: // should be spread but not bothered
+            currentWeapon = WeaponType::SHOTGUN;
+            _projectileEmitter->setFireRate(1.0f);
+            _projectileEmitter->setProjectileDamage(20);
+            _projectileEmitter->setProjectileSpeed(100.0f);
+            break;
+        case WeaponType::RIFLE:
+            currentWeapon = WeaponType::RIFLE;
+            _projectileEmitter->setFireRate(0.1f);
+            _projectileEmitter->setProjectileDamage(5);
+            _projectileEmitter->setProjectileSpeed(1000.0f);
+            break;
+    }
+}
+
+void Player::die() {
+    _currentState = PlayerState::DEAD;
+    AudioManager::get_instance().playSound("player death");
+    _character->setHealth(0);
+    _parent->setForDelete();
+    Engine::_gameState = GameStates::GAMEOVER;
 }
 
 void Player::onCollisionEnter(Entity *other) const {
@@ -257,3 +398,5 @@ void Player::onCollisionEnter(Entity *other) const {
         _character->setHealth(_character->getHealth() - 10);
     }
 }
+
+

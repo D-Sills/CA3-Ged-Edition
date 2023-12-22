@@ -1,6 +1,6 @@
 #include "cmp_character.h"
 
-CharacterComponent::CharacterComponent(Entity* p) : Component(p), _health(100), _damage(10), _attackTime(0.0f), _deathTime(0.0f) {  }
+CharacterComponent::CharacterComponent(Entity* p) : Component(p), _speed(10), _health(100), _damage(10), _attackTime(0.0f), _deathTime(0.0f) {  }
 
 void CharacterComponent::setHealth(int health) {
     _health = health;
@@ -16,6 +16,14 @@ int CharacterComponent::getHealth() const {
 
 int CharacterComponent::getDamage() const {
     return _damage;
+}
+
+float CharacterComponent::getSpeed() const {
+    return _speed;
+}
+
+void CharacterComponent::setSpeed(float speed) {
+    _speed = speed;
 }
 
 

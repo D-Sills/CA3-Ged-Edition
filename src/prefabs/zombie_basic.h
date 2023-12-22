@@ -17,15 +17,25 @@ private:
     std::shared_ptr<ZombieAIComponent> _pathfinding;
     std::shared_ptr<SpriteComponent> _spriteComp;
     std::shared_ptr<CharacterControllerComponent> _controller;
-    b2Body* _body;
+    b2Body* _body{};
+    std::function<void()> _onRelease;
+    int _xpValue = 10;
 
 public:
     explicit Zombie(Entity* p);
 
-    void onCollisionEnter(Entity* other) const;
+    void onCollisionEnter(Entity* other);
 
     void setOnRelease(const std::function<void()>& onRelease);
-    std::function<void()> _onRelease;
+
+    void takeDamage(int damage);
+
+    void tearDown();
+
+    void die();
+    void attack();
+
+    void dropPickup();
 
     void init();
     void update(double dt) override;

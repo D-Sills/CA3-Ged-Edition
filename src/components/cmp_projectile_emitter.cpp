@@ -1,14 +1,9 @@
-
-#include "../engine/system_resources.h"
 #include "../audio_manager.h"
 #include "cmp_projectile_emitter.h"
 #include "../prefabs/player.h"
 
-ProjectileEmitterComponent::ProjectileEmitterComponent(Entity *p,float fireRate, float speed, int damage)
-        : Component(p), _fireRate(fireRate) {
-    setProjectileDamage(damage);
-    setProjectileSpeed(speed);
-}
+ProjectileEmitterComponent::ProjectileEmitterComponent(Entity *p) : Component(p),
+_projectilePool(100,  [](const std::shared_ptr<Entity>& entity) { entity->addComponent<ProjectileComponent>();}) {}
 
 void ProjectileEmitterComponent::update(double dt) {
     _timeSinceLastFire += dt;
@@ -22,13 +17,14 @@ bool ProjectileEmitterComponent::fireProjectile(const sf::Vector2f& position, fl
     auto entity = _projectilePool.acquireObject();
     if (entity) {
         auto proj = entity->get_components<ProjectileComponent>()[0];
-        //_parent->get_components<Player>()[0]->setState(PlayerState::SHOOTING);
-        proj->fire(position, angle);
-        proj->setOnRelease([this, entity]() {
-            _projectilePool.releaseObject(entity);
+        proj->init();
+        proj->setDamage(_damage);
+        proj->setSpeed(_speed);
+        proj->setOnRelease([this, proj]() {
+            _projectilePool.releaseObject((shared_ptr<Entity> &) proj->_parent);
         });
+        proj->fire(position, angle);
 
-        AudioManager::get_instance().playSound("Shoot_001");
         _timeSinceLastFire = 0.0f;
         return true;
     }
@@ -40,19 +36,9 @@ void ProjectileEmitterComponent::setFireRate(float fireRate) {
 }
 
 void ProjectileEmitterComponent::setProjectileSpeed(float speed) {
-    _projectilePool.forEach([speed](const std::shared_ptr<Entity>& entity) {
-        auto proj = entity->get_components<ProjectileComponent>()[0];
-        if (proj) {
-            proj->setSpeed(speed);
-        }
-    });
+    _speed = speed;
 }
 
 void ProjectileEmitterComponent::setProjectileDamage(int damage) {
-    _projectilePool.forEach([damage](const std::shared_ptr<Entity>& entity) {
-        auto proj = entity->get_components<ProjectileComponent>()[0];
-        if (proj) {
-            proj->setDamage(damage);
-        }
-    });
+    _damage = damage;
 }

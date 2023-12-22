@@ -43,7 +43,7 @@ void Button::update(double dt) {
     if (shape.getGlobalBounds().contains(mousePos)) {
         if (Mouse::isButtonPressed(Mouse::Left)) {
             if (buttonState != ButtonState::Down) {
-                AudioManager::get_instance().playSound("Click");
+                AudioManager::get_instance().playSound("click");
                 if (onClickFunc) {
                     onClickFunc(); // Execute the callback
                 }
@@ -52,7 +52,7 @@ void Button::update(double dt) {
             buttonState = ButtonState::Down;
         } else {
             if (isHoveredFirstTime) {
-                AudioManager::get_instance().playSound("Hit");
+                AudioManager::get_instance().playSound("hover");
                 isHoveredFirstTime = false;
                 shape.setFillColor(hoverColor);
             }

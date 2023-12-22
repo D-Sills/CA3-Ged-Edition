@@ -102,6 +102,8 @@ public:
 	void setVisible(bool _visible);
 
 	std::vector<std::shared_ptr<Component>> getComponents();
+
+    void removeComponents();
 	void setComponents(std::vector<std::shared_ptr<Component>> components);
 
 	template <typename T, typename... Targs>

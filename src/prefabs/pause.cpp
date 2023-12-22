@@ -17,17 +17,7 @@ Pause::Pause(Entity* p) : Component(p) {
 }
 
 void Pause::update(double dt) {
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape) || sf::Keyboard::isKeyPressed(sf::Keyboard::P)) {
-        _parent->setVisible(!_parent->isVisible());
 
-        if (_parent->isVisible()) {
-            Engine::GetWindow().setMouseCursorVisible(true);
-            Engine::_gameState = GameStates::PAUSE;
-        } else {
-            Engine::GetWindow().setMouseCursorVisible(false);
-            Engine::_gameState = GameStates::WAVE;
-        }
-    }
 }
 
 void Pause::render() {

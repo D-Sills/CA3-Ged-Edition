@@ -24,4 +24,6 @@ public:
 	void Render() override;
 
     void NextWave();
+
+    bool isPaused = false;
 };

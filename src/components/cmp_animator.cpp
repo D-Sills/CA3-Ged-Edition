@@ -41,22 +41,17 @@ void AnimatorComponent::stop() {
 
 }
 
-void AnimatorComponent::update(double dt) {ss
-    if (frames.empty()) {
-        return; // No frames to animate
-    }
+void AnimatorComponent::update(double dt) {
+    if (frames.empty()) return;
 
     totalProgress += dt;
-    while (totalProgress >= frames[frameCount].duration) {
-        totalProgress -= frames[frameCount].duration; // Subtract the duration of the current frame
-        frameCount = (frameCount + 1) % frames.size(); // Advance to the next frame
-
-        // Update the sprite component's texture rect
-        if (_spriteComp) {
-            _spriteComp->setTextureRect(frames[frameCount].rect);
-        }
+    if (totalProgress >= frames[frameCount].duration) {
+        frameCount = (frameCount + 1) % frames.size();
+        _spriteComp->setTextureRect(frames[frameCount].rect);
+        totalProgress = 0.f;
     }
 }
+
 
 
 void AnimatorComponent::render() {}

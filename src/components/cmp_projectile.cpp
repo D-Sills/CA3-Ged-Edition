@@ -1,25 +1,15 @@
 #include "cmp_projectile.h"
 #include "../engine/system_renderer.h"
 #include "../engine/system_resources.h"
-#include "../engine/engine.h"
-#include "../engine/scene.h"
 #include "cmp_sprite.h"
 #include "../engine/system_physics.h"
 #include "cmp_character.h"
-#include "cmp_projectile_emitter.h"
 #include <cmath>
-#include <utility>
 
 using namespace sf;
 using namespace std;
 
 ProjectileComponent::ProjectileComponent(Entity* p) : Component(p) {
-    _parent->setVisible(false);
-    _parent->addTag("bullet");
-    _parent->setOnCollision([this](Entity* e) { onCollisionEnter(e); });
-    _damage = 1;
-    _angle = 0.0f;
-    _speed = 100.0f;
     _sprite = _parent->addComponent<SpriteComponent>();
     _sprite->setTexture(Resources::load<Texture>("bulletGlow.png"));
 
@@ -42,17 +32,26 @@ ProjectileComponent::ProjectileComponent(Entity* p) : Component(p) {
 
 }
 
+void ProjectileComponent::init() {
+    _parent->addTag("bullet");
+    _parent->setPosition(sf::Vector2f (10000, 10000));
+    _parent->setVisible(true);
+
+    _parent->setOnCollision([this](Entity* e) { onCollisionEnter(e); });
+}
+
 void ProjectileComponent::update(double dt) {
     if (!_parent->isVisible()) return;
 
     RenderWindow& window = Engine::GetWindow();
     const View view = window.getView();
 
-    // If bullet is out of bounds. remove/return;
     if (getPosition().x < view.getCenter().x - 100 - view.getSize().x * 0.5 || getPosition().x > view.getCenter().x + 100 + view.getSize().x * 0.5
         || getPosition().y < view.getCenter().y - 100 - view.getSize().y * 0.5 || getPosition().y > view.getCenter().y + 100 + view.getSize().y * 0.5) {
-        _parent->setVisible(false);
-        return;
+        if (_onRelease) {
+            Physics::markBodyForDestruction(_body);
+            _onRelease();
+        }
     } else {
         float dx = cos(_angle) * _speed;
         float dy = sin(_angle) * _speed;
@@ -66,10 +65,8 @@ void ProjectileComponent::fire(const sf::Vector2f& pos, float ang) {
     _parent->setPosition(pos);
     _angle = ang;
 
-    // Convert angle to radians
     float radAngle = ang * (b2_pi / 180.f);
 
-    // Adjust position for Box2D world
     b2Vec2 bodyPos(pos.x / Physics::PIXEL_PER_METER, pos.y / Physics::PIXEL_PER_METER);
     _body->SetTransform(bodyPos, radAngle);
 
@@ -84,14 +81,18 @@ void ProjectileComponent::setDamage(int damage) {
     _damage = damage;
 }
 
+int ProjectileComponent::getDamage() const {
+    return _damage;
+}
+
 void ProjectileComponent::setOnRelease(const std::function<void()>& onRelease) {
     _onRelease = onRelease;
 }
 
 void ProjectileComponent::onCollisionEnter(Entity *other) const {
     if (other->hasTag("enemy")) {
-        other->get_components<CharacterComponent>()[0]->setHealth(other->get_components<CharacterComponent>()[0]->getHealth() - _damage);
         if (_onRelease) {
+            Physics::markBodyForDestruction(_body);
             _onRelease();
         }
     }

@@ -22,4 +22,8 @@ public:
     void update(double dt) override;
 
     void render() override {}
+
+    bool isMoving() const {
+        return _moveDirection.LengthSquared() > 0;
+    }
 };

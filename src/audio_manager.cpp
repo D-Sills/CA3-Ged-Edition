@@ -1,6 +1,7 @@
 #include "audio_manager.h"
 #include <filesystem>
 #include <iostream>
+#include <random>
 
 AudioManager& AudioManager::get_instance() {
     static AudioManager instance;
@@ -15,10 +16,23 @@ void AudioManager::init() {
 }
 
 void AudioManager::playSound(const std::string& name) {
-    auto it = sounds.find(name);
-    if (it != sounds.end()) {
-        it->second.setVolume(masterVolume);
-        it->second.play();
+    std::random_device rd;
+    std::mt19937 rng(rd());
+    auto itGroup = soundGroups.find(name);
+    if (itGroup != soundGroups.end()) {
+        std::uniform_int_distribution<size_t> dist(0, itGroup->second.size() - 1);
+        auto& soundName = itGroup->second[dist(rng)];
+        auto itSound = sounds.find(soundName);
+        if (itSound != sounds.end()) {
+            itSound->second.setVolume(masterVolume);
+            itSound->second.play();
+        }
+    } else {
+        auto it = sounds.find(name);
+        if (it != sounds.end()) {
+            it->second.setVolume(masterVolume);
+            it->second.play();
+        }
     }
 }
 
@@ -77,14 +91,21 @@ void AudioManager::loadSoundsFromDirectory(const std::string& directory) {
     for (const auto& entry : std::filesystem::directory_iterator(directory)) {
         if (entry.is_regular_file()) {
             auto ext = entry.path().extension().string();
-            if (ext == ".ogg" || ext == ".wav") { // Check for .ogg and .wav files
+            if (ext == ".ogg" || ext == ".wav") {
                 std::string filename = entry.path().string();
                 sf::SoundBuffer buffer;
                 if (buffer.loadFromFile(filename)) {
-                    std::string soundName = entry.path().stem().string(); // Extract sound name from filename
+                    std::string soundName = entry.path().stem().string();
                     soundBuffers[soundName] = buffer;
                     sounds[soundName].setBuffer(soundBuffers[soundName]);
                     std::cout << "Loaded sound: " << soundName << std::endl;
+
+                    // Check for sound group (naming convention: groupname_number)
+                    auto underscorePos = soundName.find('_');
+                    if (underscorePos != std::string::npos) {
+                        std::string groupName = soundName.substr(0, underscorePos);
+                        soundGroups[groupName].push_back(soundName);
+                    }
                 }
             }
         }

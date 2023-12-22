@@ -1,70 +1,81 @@
 #pragma once
+#ifndef OBJECT_POOL_H
+#define OBJECT_POOL_H
+
+#include <utility>
 #include <vector>
-#include <memory>
 #include <functional>
+#include <stack>
+#include <memory>
 #include "engine/engine.h"
 #include "engine/scene.h"
-
 template <typename T>
 class ObjectPool {
 public:
-    explicit ObjectPool(size_t size);
+    explicit ObjectPool(size_t size, std::function<void(std::shared_ptr<Entity>)> initFunc);
     std::shared_ptr<Entity> acquireObject();
-    void releaseObject(const std::shared_ptr<Entity>& entity);
+    void releaseObject(std::shared_ptr<Entity>& entity);
     void forEach(const std::function<void(std::shared_ptr<Entity>)>& func);
-    std::vector<std::shared_ptr<Entity>> getPool() {
-        return pool;
-    }
 
 private:
     std::vector<std::shared_ptr<Entity>> pool;
-    std::vector<bool> available;
+    std::stack<size_t> availableIndices;
+    std::function<void(std::shared_ptr<Entity>)> initializer;
 };
 
 template <typename T>
-ObjectPool<T>::ObjectPool(size_t size) : pool(size), available(size, true) {
+ObjectPool<T>::ObjectPool(size_t size, std::function<void(std::shared_ptr<Entity>)> initFunc)
+        : initializer(std::move(initFunc)) {
     if (Engine::_activeScene == nullptr) {
         throw std::runtime_error("ObjectPool must be initialized after a scene has been loaded");
     }
     for (size_t i = 0; i < size; ++i) {
         auto entity = Engine::_activeScene->makeEntity();
-        entity->template addComponent<T>();
-        pool[i] = entity;
-        pool[i]->setVisible(false);
+        entity->setPosition({10000, 10000});
+        initializer(entity);
+        pool.push_back(entity);
+        availableIndices.push(i);
+        entity->setVisible(false);
     }
 }
 
 template <typename T>
 std::shared_ptr<Entity> ObjectPool<T>::acquireObject() {
-    for (size_t i = 0; i < pool.size(); ++i) {
-        if (available[i]) {
-            available[i] = false;
-            pool[i]->setVisible(true);
-            return pool[i]; // Returns the Entity with the component attached
-        }
+    if (availableIndices.empty()) {
+        return nullptr;
     }
-    return nullptr; // Pool is full
+    size_t index = availableIndices.top();
+    availableIndices.pop();
+    auto entity = pool[index];
+    entity->setVisible(true);
+    entity->addComponent<T>();
+    return entity;
 }
 
-
 template <typename T>
-void ObjectPool<T>::releaseObject(const std::shared_ptr<Entity>& entity) {
+void ObjectPool<T>::releaseObject(std::shared_ptr<Entity>& entity) {
     auto it = std::find(pool.begin(), pool.end(), entity);
     if (it != pool.end()) {
         size_t index = std::distance(pool.begin(), it);
-        available[index] = true;
+        availableIndices.push(index);
         entity->setVisible(false);
-        //entity->setForDelete();
+        entity->setPosition({10000, 10000});
+        entity->removeComponents();
+        std::cout << "Object released" << std::endl;
+        std::cout << "Pool size: " << pool.size() << std::endl;
+        std::cout << "Available indices: " << availableIndices.size() << std::endl;
+    } else {
+        throw std::runtime_error("Attempted to release an entity not part of the pool");
     }
 }
-
 
 template <typename T>
 void ObjectPool<T>::forEach(const std::function<void(std::shared_ptr<Entity>)>& func) {
     for (auto& entity : pool) {
-        if (!available[std::distance(pool.begin(), std::find(pool.begin(), pool.end(), entity))]) {
-            func(entity); // Apply the function to the Entity
+        if (entity->isVisible()) {
+            func(entity);
         }
     }
 }
 
+#endif //OBJECT_POOL_H

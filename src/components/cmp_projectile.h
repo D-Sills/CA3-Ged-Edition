@@ -16,8 +16,12 @@ public:
 
     void onCollisionEnter(Entity* other) const;
 
+    void init();
+
     void setSpeed(float speed);
     void setDamage(int damage);
+
+    int getDamage() const;
 
     void setOnRelease(const std::function<void()>& onRelease);
     std::function<void()> _onRelease;
@@ -29,6 +33,6 @@ private:
     int _damage{};
 
     std::shared_ptr<SpriteComponent> _sprite;
-    b2Body* _body;
+    b2Body* _body{};
 
 };

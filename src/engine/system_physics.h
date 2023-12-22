@@ -12,6 +12,9 @@ namespace Physics {
 
 	std::shared_ptr<b2World> GetWorld();
 
+    void markBodyForDestruction(b2Body* body);
+    void processDestructionQueue();
+
 	const float physics_scale = 30.0f;
 	const float physics_scale_inv = 1.0f / physics_scale;
     const float PIXEL_PER_METER = 32.0f;

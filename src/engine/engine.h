@@ -13,6 +13,7 @@ enum class GameStates {
     WAVE,
     PAUSE,
     GAMEOVER,
+    UPGRADE,
 };
 
 class Engine {

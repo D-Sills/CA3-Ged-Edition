@@ -35,7 +35,7 @@ void TestScene::Load() {
     pause = makeUiEntity();
     auto p2 = pause->addComponent<Pause>();
 
-    zombieSpawner = new ZombieSpawner({0, 0, 800, 600}, 2.0f);
+    zombieSpawner = new ZombieSpawner({0, 0, 800, 600}, 8.0f);
 
 	setLoaded(true);
 
@@ -46,9 +46,27 @@ void TestScene::Load() {
 void TestScene::Update(const double& dt) {
     if (!isLoaded()) return;
 
-	if (!player->isAlive()) {
-        Engine::_gameState = GameStates::GAMEOVER;
-	}
+    if (Engine::_gameState == GameStates::GAMEOVER) {
+        Engine::ChangeScene(&menuScene);
+        this->UnLoad();
+    }
+
+    if (Engine::_gameState == GameStates::GAMEOVER) {
+        return;
+    }
+
+    if (Keyboard::isKeyPressed(Keyboard::Escape) || Keyboard::isKeyPressed(Keyboard::P)) {
+        // need to add a buffer to prevent multiple presses
+        pause->setVisible(!pause->isVisible());
+
+        if (pause->isVisible()) {
+            Engine::GetWindow().setMouseCursorVisible(true);
+            Engine::_gameState = GameStates::PAUSE;
+        } else {
+            Engine::GetWindow().setMouseCursorVisible(false);
+            Engine::_gameState = GameStates::WAVE;
+        }
+    }
 
 	if (Engine::_gameState != GameStates::PAUSE) {
         if (Keyboard::isKeyPressed(Keyboard::W) && Engine::_gameState == GameStates::PREPARE) {
@@ -67,11 +85,6 @@ void TestScene::Update(const double& dt) {
 
         ecm.update(dt);
         ui_ecm.update(dt);
-
-        auto p = player->get_components<CharacterComponent>()[0];
-        auto h = hudManager->get_components<HUDManager>()[0];
-
-        h->updateValues(p->getHealth(), 2, 77, 1233, 65656, 4);
 	}
 
     if (Keyboard::isKeyPressed(Keyboard::Enter)) {
@@ -99,6 +112,5 @@ void TestScene::Render() {
 
 void TestScene::NextWave() {
     auto h = hudManager->get_components<HUDManager>()[0];
-    h->setScore(100);
     zombieSpawner->startWave();
 }

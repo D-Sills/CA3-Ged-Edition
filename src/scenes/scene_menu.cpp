@@ -10,7 +10,9 @@ using namespace std;
 using namespace sf;
 
 void MenuScene::Load() {
-    AudioManager::get_instance().playMusic("Cold-Moon.ogg", true, 0.5f);
+    Engine::GetWindow().setMouseCursorVisible(true);
+
+    AudioManager::get_instance().playMusic("ambience.wav", true, 0.5f);
 
     menuView = Engine::GetWindow().getDefaultView();
     menuView.reset(sf::FloatRect(0, 0, Engine::GetWindow().getSize().x, Engine::GetWindow().getSize().y));

@@ -15,7 +15,28 @@ enum class PlayerState {
     WALKING,
     AIMING,
     RELOADING,
-    INTERACTING
+    INTERACTING,
+    DEAD
+};
+
+enum class UpgradeType {
+    HEALTH,
+    DAMAGE,
+    SPEED
+};
+
+enum class WeaponType {
+    PISTOL,
+    SHOTGUN,
+    RIFLE
+};
+
+enum class PickupType {
+    HEALTH,
+    PISTOL_AMMO,
+    SHOTGUN_AMMO,
+    RIFLE_AMMO,
+    XP
 };
 
 class Player : public Component {
@@ -29,15 +50,30 @@ private:
     std::shared_ptr<AnimatorComponent> _animator;
     b2Body* _body;
 
-    int bulletCount = 0;
-    int bulletMax = 10;
-    int currentBullet = 0;
+    int pistolAmmo = 200;
+    int shotgunAmmo = 50;
+    int rifleAmmo = 100;
+
+    int pistolAmmoMax = 10;
+    int shotgunAmmoMax = 4;
+    int rifleAmmoMax = 30;
+
+    int currentPistolCount = 10;
+    int currentShotgunCount = 4;
+    int currentRifleCount = 30;
 
     bool isReloading = false;
     float reloadTime = 2.0f;
     float reloadTimer = 0.0f;
     float interactCooldown = 0.5f;
     float interactTimer = 0.0f;
+
+    float footstepTimer = 0.0f;
+    const float footstepInterval = 0.5f;
+
+    float invincibilityTimer = 0.0f;
+
+    float currentXP = 0.0f;
 
     Animation _idle = Animation(nullptr, {});
     Animation _walk = Animation(nullptr, {});
@@ -46,6 +82,9 @@ private:
     Animation _interact = Animation(nullptr, {});
 public:
     explicit Player(Entity* p);
+    ~Player() override {
+        _parent->setForDelete();
+    }
 
     void onCollisionEnter(Entity* other) const;
 
@@ -58,10 +97,22 @@ public:
 
     void setupAnimations();
 
-    void setState(PlayerState state);
+    WeaponType currentWeapon;
 
     void update(double dt) override;
     void render() override;
+
+    void addXP(float amount);
+
+    void applyUpgrade(float amount, UpgradeType type);
+    void applyPickup(int amount, PickupType type);
+    void switchWeapon(WeaponType type);
+
+
+    void takeDamage(int damage);
+    void die();
+
+    int level = 1;
 };
 
 #endif

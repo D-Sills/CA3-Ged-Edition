@@ -14,6 +14,7 @@ class CharacterComponent : public Component {
 protected:
     int _health;
     int _damage;
+    float _speed;
     float _attackTime;
     float _deathTime;
 
@@ -23,16 +24,14 @@ public:
 
     void setHealth(int health);
     void setDamage(int damage);
+    void setSpeed(float speed);
     int getHealth() const;
     int getDamage() const;
+    float getSpeed() const;
 
-    void update(double dt) override {
+    void update(double dt) override {}
 
-    }
-
-    void render() override {
-
-    }
+    void render() override {}
 };
 
 #endif

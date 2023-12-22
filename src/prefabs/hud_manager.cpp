@@ -3,6 +3,8 @@
 
 
 HUDManager::HUDManager(Entity* p): Component(p) {
+    _parent->addTag("hud");
+
     Engine::GetWindow().setMouseCursorVisible(false);
 
     // Health Bar - Top Left

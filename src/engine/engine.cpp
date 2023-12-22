@@ -45,6 +45,8 @@ void Engine::Update() {
 		_activeScene->Update(dt);
 	}
     AudioManager::get_instance().update(dt);
+
+    Physics::processDestructionQueue();
 }
 
 void Engine::Render(RenderWindow& window) {
