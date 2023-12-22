@@ -16,19 +16,15 @@ using namespace sf;
 
 Zombie::Zombie(Entity* p)
         : Component(p) {
-    _parent->addTag("enemy");
+    initialised = false;
     _spriteComp = _parent->addComponent<SpriteComponent>();
-    auto tex = Resources::load<Texture>("crawler.png");
-    if (tex) {
-        _spriteComp->setTexture(tex);
-    }
+    _spriteComp->setTexture(Resources::load<Texture>("crawler.png"));
 
-    // Add a Collider Component
     b2BodyDef bodyDef;
     bodyDef.type = b2_dynamicBody;  // Change as needed
     bodyDef.position.Set(_parent->getPosition().x / Physics::PIXEL_PER_METER , _parent->getPosition().y / Physics::PIXEL_PER_METER);
     b2PolygonShape dynamicBox;
-    dynamicBox.SetAsBox(32.0f / Physics::PIXEL_PER_METER, 32.0f / Physics::PIXEL_PER_METER);  // Change as needed
+    dynamicBox.SetAsBox(6.0f / Physics::PIXEL_PER_METER, 32.0f / Physics::PIXEL_PER_METER);  // Change as needed
 
     b2FixtureDef fixtureDef;
     fixtureDef.shape = &dynamicBox;
@@ -40,56 +36,82 @@ Zombie::Zombie(Entity* p)
     _body->SetUserData(_parent);
     _body->SetLinearDamping(1);
 
-    _parent->setOnCollision([this](Entity* e) { onCollisionEnter(e); });
+    _controller = _parent->addComponent<CharacterControllerComponent>(_body);
+
+    _character = _parent->addComponent<CharacterComponent>();
+
+    // random chance to be one of the 3 types of zombie
+    int type = rand() % 3;
+
+    // Load from CSV this works just not using it
+    //auto stats = DataReader::readStatsFromCSV("path/to/file.csv");
+    //_character->setMaxHealth(stats[type][0]);
+
+    if (type == 0) {
+        _spriteComp->setTexture(Resources::load<Texture>("crawler.png"));
+        _xpValue = 10;
+        _controller->setSpeed(3);
+        _character->setHealth(10);
+        _character->setDamage(5);
+        _character->setMaxHealth(10);
+    } else if (type == 1) {
+        _spriteComp->setTexture(Resources::load<Texture>("chaser.png"));
+        _xpValue = 20;
+        _controller->setSpeed(5);
+        _character->setHealth(20);
+        _character->setDamage(10);
+        _character->setMaxHealth(20);
+    } else if (type == 2) {
+        _spriteComp->setTexture(Resources::load<Texture>("bloater.png"));
+        _xpValue = 30;
+        _controller->setSpeed(2);
+        _character->setHealth(30);
+        _character->setDamage(15);
+        _character->setMaxHealth(30);
+
+    }
+
+
 }
 
 void Zombie::init(Vector2f position) {
+    _parent->addTag("enemy");
     _parent->setVisible(true);
     //
     // Add a Sprite Component
 
     _parent->setPosition(position);
-
+    std::cout << "Zombie position: " << _parent->getPosition().x << ", " << _parent->getPosition().y << std::endl;
     //_pathfinding = _parent->addComponent<ZombieAIComponent>(10, 5);
 
-    //_controller = _parent->addComponent<CharacterControllerComponent>(_body);
 
-    _character = _parent->addComponent<CharacterComponent>();
 
-    // Load from CSV
-    //uto stats = DataReader::readStatsFromCSV("path/to/file.csv");
-    //auto health = stats["zombie_basic"].attributes["health"];
-    //auto speed = stats["zombie_basic"].attributes["speed"];
 
-    //_controller->setSpeed(speed);
-    _character->setHealth(10);
-    _character->setDamage(10);
+
+
+    _parent->setOnCollision([this](Entity* e) { onCollisionEnter(e); });
+
+
+    initialised = true;
 
 }
 
 void Zombie::update(double dt) { // not using the controller because i am sick of this assignment and extremely burnt out :)
-    if (!_parent->isVisible()) return;
+    if (!_parent->isVisible() || !initialised) return;
 
     auto playerPos = Engine::_activeScene->getEcm().find("player")[0]->getPosition();
     sf::Vector2f direction = playerPos - _parent->getPosition();
 
-    // Normalize the direction
-    float magnitude = sqrt(direction.x * direction.x + direction.y * direction.y);
-    if (magnitude > 0) {
-        direction /= magnitude;
+    if (direction != sf::Vector2f(0, 0)) {
+        float magnitude = sqrt(direction.x * direction.x + direction.y * direction.y);
+        direction /= magnitude; // Normalize the direction
 
-        // Set Box2D body velocity
-        float speed = 5.0f; // Adjust speed as needed
-        _body->SetLinearVelocity(b2Vec2(direction.x * speed, direction.y * speed));
-        _parent->setPosition(Vector2f(_body->GetPosition().x * Physics::PIXEL_PER_METER, _body->GetPosition().y * Physics::PIXEL_PER_METER));
-
-        // Set rotation to face the player
-        float angleRadians = atan2(direction.y, direction.x);
-        _parent->setRotation(angleRadians * 180 / M_PI); // Convert to degrees
-        std::cout << "Zombie position: " << _parent->getPosition().x << ", " << _parent->getPosition().y << std::endl;
-    } else {
-        _body->SetLinearVelocity(b2Vec2(0, 0));
+        _controller->move(direction); // Use the controller to move towards the player
     }
+
+    // Set rotation to face the player
+    float angle = atan2(direction.y, direction.x);
+    _parent->setRotation(angle * 180 / M_PI);
 }
 
 
@@ -114,10 +136,9 @@ void Zombie::die() {
     blood->setPosition(_parent->getPosition());
     auto sprite = blood->addComponent<SpriteComponent>();
     sprite->setTexture(Resources::load<Texture>("blood.png"));
+    tearDown();
 
-    if (_onRelease) {
-        _onRelease();
-    }
+    if (_onRelease) _onRelease();
 }
 
 void Zombie::dropPickup() {
@@ -140,20 +161,23 @@ void Zombie::takeDamage(int damage) {
     if (_character->getHealth() <= 0) {
         die();
     }
+    std::cout << "Zombie health: " << _character->getHealth() << std::endl;
 }
 
 void Zombie::onCollisionEnter(Entity *other) {
-    if (other->hasTag("bullet")) {
-        auto bullet = other->get_components<ProjectileComponent>()[0];
-        takeDamage(bullet->getDamage());
-    }
+    if (!_parent->isVisible() || !initialised) return;
+
     if (other->hasTag("player")) {
         auto player = other->get_components<Player>()[0];
-        AudioManager::get_instance().playSound("player take damage");
-        player->takeDamage(_character->getDamage());
+        if (player)
+            player->takeDamage(_character->getDamage());
     }
 }
 
 void Zombie::tearDown() {
+    _parent->setVisible(false);
+    initialised = false;
+    _parent->setOnCollision([](Entity* e) { return; });
     Physics::markBodyForDestruction(_body);
+
 }

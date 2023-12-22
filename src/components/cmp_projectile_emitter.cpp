@@ -3,11 +3,7 @@
 #include "../prefabs/player.h"
 
 ProjectileEmitterComponent::ProjectileEmitterComponent(Entity *p) : Component(p),
-_projectilePool(10,  [](const std::shared_ptr<Entity>& entity) { entity->addComponent<ProjectileComponent>();}) {}
-
-ProjectileEmitterComponent::~ProjectileEmitterComponent() {
-    _projectilePool.clear();
-}
+_projectilePool(100,  [](const std::shared_ptr<Entity>& entity) { entity->addComponent<ProjectileComponent>();}) {}
 
 void ProjectileEmitterComponent::update(double dt) {
     _timeSinceLastFire += dt;
@@ -20,7 +16,7 @@ bool ProjectileEmitterComponent::fireProjectile(const sf::Vector2f& position, fl
 
     auto entity = _projectilePool.acquireObject();
     if (entity) {
-        auto proj = entity->get_components<ProjectileComponent>()[0];
+        auto proj = entity->addComponent<ProjectileComponent>();
         proj->init();
         proj->setDamage(_damage);
         proj->setSpeed(_speed);

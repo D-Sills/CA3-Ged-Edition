@@ -20,6 +20,7 @@ private:
     b2Body* _body;
     std::function<void()> _onRelease;
     int _xpValue = 10;
+    bool initialised = false;
 
 public:
     explicit Zombie(Entity* p);

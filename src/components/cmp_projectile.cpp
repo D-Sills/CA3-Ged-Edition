@@ -4,6 +4,7 @@
 #include "cmp_sprite.h"
 #include "../engine/system_physics.h"
 #include "cmp_character.h"
+#include "../prefabs/zombie_basic.h"
 #include <cmath>
 
 using namespace sf;
@@ -89,10 +90,17 @@ void ProjectileComponent::setOnRelease(const std::function<void()>& onRelease) {
 }
 
 void ProjectileComponent::onCollisionEnter(Entity *other) const {
+    if (!_parent->isVisible()) return;
     if (other->hasTag("enemy")) {
+        auto z = other->get_components<Zombie>()[0];
+        if (z) {
+            z->takeDamage(_damage);
+        }
+
         if (_onRelease) {
             Physics::markBodyForDestruction(_body);
             _onRelease();
         }
     }
+
 }

@@ -25,7 +25,7 @@ public:
 
     void setOnRelease(const std::function<void()>& onRelease);
     std::function<void()> _onRelease;
-
+    b2Body* _body;
 private:
 
     float _angle{};
@@ -33,6 +33,5 @@ private:
     int _damage{};
 
     std::shared_ptr<SpriteComponent> _sprite;
-    b2Body* _body{};
 
 };

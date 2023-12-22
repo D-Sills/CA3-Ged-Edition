@@ -17,15 +17,7 @@ public:
     void releaseObject(const std::shared_ptr<Entity>& entity);
     void forEach(const std::function<void(std::shared_ptr<Entity>)>& func);
     void clear() {
-        for (auto& entity : pool) {
-            entity->setVisible(false);
-            entity->setPosition({10000, 10000});
-            entity->removeComponents();
-        }
-        availableIndices = std::stack<size_t>();
-        for (size_t i = 0; i < pool.size(); ++i) {
-            availableIndices.push(i);
-        }
+
 
     }
 
@@ -43,7 +35,7 @@ ObjectPool<T>::ObjectPool(size_t size, std::function<void(std::shared_ptr<Entity
     }
     for (size_t i = 0; i < size; ++i) {
         auto entity = Engine::_activeScene->makeEntity();
-        entity->setPosition({10000, 10000});
+        //entity->setPosition({1000, 1000});
         initializer(entity);
         pool.push_back(entity);
         availableIndices.push(i);
@@ -60,7 +52,7 @@ std::shared_ptr<Entity> ObjectPool<T>::acquireObject() {
     availableIndices.pop();
     auto entity = pool[index];
     entity->setVisible(true);
-    entity->addComponent<T>();
+    //entity->addComponent<T>();
     return entity;
 }
 
@@ -71,7 +63,7 @@ void ObjectPool<T>::releaseObject(const std::shared_ptr<Entity>& entity) {
         size_t index = std::distance(pool.begin(), it);
         availableIndices.push(index);
         entity->setVisible(false);
-        entity->setPosition({10000, 10000});
+        entity->setPosition({3000, 3000});
         entity->removeComponents();
         std::cout << "Object released" << std::endl;
         std::cout << "Pool size: " << pool.size() << std::endl;

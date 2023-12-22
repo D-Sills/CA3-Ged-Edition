@@ -12,12 +12,7 @@ using namespace std;
 using namespace sf;
 
 void TestScene::Load() {
-    LevelSystem::loadLevelFile("res/levels/smallFloorMap.txt", 32.0f);
-
-
-
-
-
+    //LevelSystem::loadLevelFile("res/levels/smallFloorMap.txt", 32.0f);
 
     //HUD Variables
     uiView = Engine::GetWindow().getDefaultView();
@@ -28,7 +23,7 @@ void TestScene::Load() {
     gameView = Engine::GetWindow().getDefaultView();
     gameView.reset(sf::FloatRect(0, 0, Engine::GetWindow().getSize().x, Engine::GetWindow().getSize().y));
     player = makeEntity();
-    player->setPosition(LevelSystem::getTilePosition(LevelSystem::findTiles(ls::START)[0]));
+    player->setPosition({400, 300});
     auto p = player->addComponent<Player>(h);
     gameView.setCenter(player->getPosition());
 
@@ -59,6 +54,10 @@ void TestScene::Update(const double& dt) {
     if (Engine::_gameState == GameStates::GAMEOVER) {
         return;
     }
+
+    auto h = hudManager->get_components<HUDManager>()[0];
+    timer += dt;
+    h->setTimer(timer);
 
     if (Keyboard::isKeyPressed(Keyboard::Escape) || Keyboard::isKeyPressed(Keyboard::P)) {
         // need to add a buffer to prevent multiple presses
@@ -102,7 +101,7 @@ void TestScene::Render() {
     if (!isLoaded()) return;
 
     Engine::setView(gameView);
-    ls::render(Engine::GetWindow());
+    //LEVELSYSTEM::render(Engine::GetWindow());
     ecm.render();
     Renderer::render();
 

@@ -16,6 +16,8 @@ public:
     shared_ptr<Entity> pause;
     ZombieSpawner* zombieSpawner;
 
+    float timer = 0.0f;
+
 	void Load() override;
 
 	void Update(const double& dt) override;

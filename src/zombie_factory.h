@@ -11,7 +11,6 @@
 class ZombieSpawner {
 public:
     ZombieSpawner(sf::FloatRect spawnArea, float spawnInterval);
-    ~ZombieSpawner();
 
     void update(double dt);
     void startWave();

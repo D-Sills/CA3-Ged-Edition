@@ -37,9 +37,10 @@ Pickup::Pickup(Entity *p, PickupType type) : Component(p) {
     fixtureDef.shape = &circleShape;
     fixtureDef.isSensor = true;  // Make it a sensor
 
-    _body = Physics::GetWorld()->CreateBody(&bodyDef);
-    _body->CreateFixture(&fixtureDef);
-    _body->SetUserData(_parent);
+   // _body = Physics::GetWorld()->CreateBody(&bodyDef);
+   // _body->CreateFixture(&fixtureDef);
+    //_body->SetUserData(_parent);
+
     _parent->setOnCollision([this](Entity* e) { onCollisionEnter(e); });
 }
 
