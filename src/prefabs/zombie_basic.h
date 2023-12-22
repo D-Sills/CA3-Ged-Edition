@@ -17,7 +17,7 @@ private:
     std::shared_ptr<ZombieAIComponent> _pathfinding;
     std::shared_ptr<SpriteComponent> _spriteComp;
     std::shared_ptr<CharacterControllerComponent> _controller;
-    b2Body* _body{};
+    b2Body* _body;
     std::function<void()> _onRelease;
     int _xpValue = 10;
 
@@ -37,7 +37,7 @@ public:
 
     void dropPickup();
 
-    void init();
+    void init(Vector2f position);
     void update(double dt) override;
     void render() override;
 };

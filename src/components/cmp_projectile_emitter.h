@@ -9,6 +9,8 @@ class ProjectileEmitterComponent : public Component {
 public:
     explicit ProjectileEmitterComponent(Entity* p);
 
+    ~ProjectileEmitterComponent() override;
+
     void update(double dt) override;
     void render() override;
     bool fireProjectile(const sf::Vector2f& position, float angle);

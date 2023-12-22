@@ -8,4 +8,6 @@ UpgradeMenu::UpgradeMenu(Entity *p) : Component(p) {
     _background->setTexture(Resources::load<sf::Texture>("overlay.png"));
 
 
+
+
 }

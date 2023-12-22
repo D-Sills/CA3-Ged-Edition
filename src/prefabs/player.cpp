@@ -10,7 +10,7 @@
 using namespace std;
 using namespace sf;
 
-Player::Player(Entity* p): Component(p) {
+Player::Player(Entity* p, const std::shared_ptr<HUDManager>& h): Component(p) , _hud(h) {
     _parent->addTag("player");
 
     _spriteComp = _parent->addComponent<SpriteComponent>();
@@ -56,8 +56,11 @@ Player::Player(Entity* p): Component(p) {
      //auto speed = stats["Player"].attributes["speed"];
 
     _controller->setSpeed(5);
-    _character->setHealth(50);
+    _character->setHealth(100);
+    _character->setMaxHealth(100);
     _character->setDamage(10);
+
+    _hud->updateValues(_character->getHealth(), _character->getMaxHealth(), currentPistolCount, pistolAmmo, 0, 0, 0);
 }
 
 void Player::update(double dt) {
@@ -114,10 +117,13 @@ void Player::update(double dt) {
 
                     if (currentWeapon == WeaponType::PISTOL) {
                         currentPistolCount--;
+                        _hud->setAmmo(currentPistolCount, pistolAmmo);
                     } else if (currentWeapon == WeaponType::SHOTGUN) {
                         currentShotgunCount--;
+                        _hud->setAmmo(currentShotgunCount, shotgunAmmo);
                     } else if (currentWeapon == WeaponType::RIFLE) {
                         currentRifleCount--;
+                        _hud->setAmmo(currentRifleCount, rifleAmmo);
                     }
                 }
             }
@@ -193,14 +199,20 @@ void Player::update(double dt) {
         if (Keyboard::isKeyPressed(Keyboard::Num1) && currentWeapon != WeaponType::PISTOL) {
             AudioManager::get_instance().playSound("equip pistol");
             switchWeapon(WeaponType::PISTOL);
+            _hud->setAmmo(currentPistolCount, pistolAmmo);
+            _hud->setWeaponIcon(Resources::load<Texture>("pistol.png"));
         }
         if (Keyboard::isKeyPressed(Keyboard::Num2) && currentWeapon != WeaponType::SHOTGUN) {
             AudioManager::get_instance().playSound("equip shotgun");
             switchWeapon(WeaponType::SHOTGUN);
+            _hud->setAmmo(currentShotgunCount, shotgunAmmo);
+            _hud->setWeaponIcon(Resources::load<Texture>("shotgun.png"));
         }
         if (Keyboard::isKeyPressed(Keyboard::Num3) && currentWeapon != WeaponType::RIFLE) {
             AudioManager::get_instance().playSound("equip ar");
             switchWeapon(WeaponType::RIFLE);
+            _hud->setAmmo(currentRifleCount, rifleAmmo);
+            _hud->setWeaponIcon(Resources::load<Texture>("ar.png"));
         }
     }
 
@@ -235,10 +247,13 @@ void Player::reload() {
     if (currentWeapon == WeaponType::PISTOL) {
         pistolAmmo -= pistolAmmoMax - currentPistolCount;
         currentPistolCount = pistolAmmoMax;
+        _hud->setAmmo(currentPistolCount, pistolAmmo);
     } else if (currentWeapon == WeaponType::SHOTGUN) {
         currentShotgunCount = shotgunAmmoMax;
+        _hud ->setAmmo(currentShotgunCount, shotgunAmmo);
     } else if (currentWeapon == WeaponType::RIFLE) {
         currentRifleCount = rifleAmmoMax;
+        _hud->setAmmo(currentRifleCount, rifleAmmo);
     }
     std::cout << "Reloaded" << std::endl;
 }
@@ -315,15 +330,25 @@ void Player::applyPickup(int amount, PickupType type) {
             break;
         case PickupType::PISTOL_AMMO:
             pistolAmmo += amount;
+            if (currentWeapon == WeaponType::PISTOL) {
+                _hud->setAmmo(currentPistolCount, pistolAmmo);
+            }
             break;
         case PickupType::SHOTGUN_AMMO:
             shotgunAmmo += amount;
+            if (currentWeapon == WeaponType::SHOTGUN) {
+                _hud->setAmmo(currentShotgunCount, shotgunAmmo);
+            }
             break;
         case PickupType::RIFLE_AMMO:
             rifleAmmo += amount;
+            if (currentWeapon == WeaponType::RIFLE) {
+                _hud->setAmmo(currentRifleCount, rifleAmmo);
+            }
             break;
         case PickupType::XP:
             addXP(amount);
+            _hud->setExp(currentXP);
             break;
     }
 }
@@ -332,8 +357,10 @@ void Player::addXP(float amount) {
     currentXP += amount;
     if (currentXP >= 100) {
         currentXP -= 100;
+        score += amount;
         level++;
         Engine::_gameState = GameStates::UPGRADE;
+        _hud->setScore(score);
         //Engine::_activeScene->getEcm().find("hudManager")[0]->get_components<HUDManager>()[0]->addUpgradePoint();
     }
 }
@@ -360,6 +387,7 @@ void Player::takeDamage(int damage) {
     invincibilityTimer = 0.5f;
     AudioManager::get_instance().playSound("hit");
     AudioManager::get_instance().playSound("player take damage");
+    _hud->setHealth(_character->getHealth(), _character->getMaxHealth());
 }
 
 void Player::switchWeapon(WeaponType type) {

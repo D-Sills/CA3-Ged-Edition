@@ -32,3 +32,7 @@ void SpriteComponent::setTexture(const std::shared_ptr<sf::Texture>& tex) {
 void SpriteComponent::setTextureRect(const sf::IntRect& rect) {
     sprite->setTextureRect(rect);
 }
+
+void SpriteComponent::setPos(sf::Vector2f pos) {
+    sprite->setPosition(pos);
+}

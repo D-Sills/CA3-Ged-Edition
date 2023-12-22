@@ -13,6 +13,7 @@ using namespace sf;
 class CharacterComponent : public Component {
 protected:
     int _health;
+    int _maxHealth;
     int _damage;
     float _speed;
     float _attackTime;
@@ -23,9 +24,11 @@ public:
     ~CharacterComponent() override = default;
 
     void setHealth(int health);
+    void setMaxHealth(int maxHealth);
     void setDamage(int damage);
     void setSpeed(float speed);
     int getHealth() const;
+    int getMaxHealth() const;
     int getDamage() const;
     float getSpeed() const;
 

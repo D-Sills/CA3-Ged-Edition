@@ -80,7 +80,7 @@ void Entity::setVisible(bool _visible) { Entity::_visible = _visible; }
 Component::Component(Entity* const p) : _parent(p), _fordeletion(false) {}
 
 Entity::~Entity() {
-    removeComponents();
+	_components.clear();
 }
 
 void Entity::removeComponents() {

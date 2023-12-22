@@ -16,15 +16,7 @@ using namespace sf;
 
 Zombie::Zombie(Entity* p)
         : Component(p) {
-    _parent->setVisible(false);
     _parent->addTag("enemy");
-    _parent->setPosition(sf::Vector2f (10000, 10000));
-}
-
-void Zombie::init() {
-    _parent->setVisible(true);
-    //
-    // Add a Sprite Component
     _spriteComp = _parent->addComponent<SpriteComponent>();
     auto tex = Resources::load<Texture>("crawler.png");
     if (tex) {
@@ -49,10 +41,18 @@ void Zombie::init() {
     _body->SetLinearDamping(1);
 
     _parent->setOnCollision([this](Entity* e) { onCollisionEnter(e); });
+}
 
-    _pathfinding = _parent->addComponent<ZombieAIComponent>(10, 5);
+void Zombie::init(Vector2f position) {
+    _parent->setVisible(true);
+    //
+    // Add a Sprite Component
 
-    _controller = _parent->addComponent<CharacterControllerComponent>(_body);
+    _parent->setPosition(position);
+
+    //_pathfinding = _parent->addComponent<ZombieAIComponent>(10, 5);
+
+    //_controller = _parent->addComponent<CharacterControllerComponent>(_body);
 
     _character = _parent->addComponent<CharacterComponent>();
 
@@ -67,7 +67,32 @@ void Zombie::init() {
 
 }
 
-void Zombie::update(double dt) {}
+void Zombie::update(double dt) { // not using the controller because i am sick of this assignment and extremely burnt out :)
+    if (!_parent->isVisible()) return;
+
+    auto playerPos = Engine::_activeScene->getEcm().find("player")[0]->getPosition();
+    sf::Vector2f direction = playerPos - _parent->getPosition();
+
+    // Normalize the direction
+    float magnitude = sqrt(direction.x * direction.x + direction.y * direction.y);
+    if (magnitude > 0) {
+        direction /= magnitude;
+
+        // Set Box2D body velocity
+        float speed = 5.0f; // Adjust speed as needed
+        _body->SetLinearVelocity(b2Vec2(direction.x * speed, direction.y * speed));
+        _parent->setPosition(Vector2f(_body->GetPosition().x * Physics::PIXEL_PER_METER, _body->GetPosition().y * Physics::PIXEL_PER_METER));
+
+        // Set rotation to face the player
+        float angleRadians = atan2(direction.y, direction.x);
+        _parent->setRotation(angleRadians * 180 / M_PI); // Convert to degrees
+        std::cout << "Zombie position: " << _parent->getPosition().x << ", " << _parent->getPosition().y << std::endl;
+    } else {
+        _body->SetLinearVelocity(b2Vec2(0, 0));
+    }
+}
+
+
 
 void Zombie::render() {}
 
@@ -103,9 +128,7 @@ void Zombie::dropPickup() {
     pickup->setPosition(_parent->getPosition());
     auto pickupType = static_cast<PickupType>(rand() % 4);
     auto pickupComp = pickup->addComponent<Pickup>(pickupType);
-    pickupComp->setOnPickup([pickup]() {
-       pickup->setForDelete();
-    });
+
 }
 
 void Zombie::attack() {}

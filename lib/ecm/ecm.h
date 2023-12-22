@@ -114,6 +114,17 @@ public:
         return ret;
 	}
 
+    template <typename T>
+    std::shared_ptr<T> getComponent() const {
+        static_assert(std::is_base_of<Component, T>::value, "T != component");
+        for (const auto& c : _components) {
+            if (typeid(*c) == typeid(T)) {
+                return std::dynamic_pointer_cast<T>(c);
+            }
+        }
+        return nullptr;
+    }
+
 	template <typename T>
 	std::vector<std::shared_ptr<T>> get_components() const {
 		static_assert(std::is_base_of<Component, T>::value, "T != component");

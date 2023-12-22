@@ -1,33 +1,37 @@
 #include "../last_light.h"
-
 #include "../engine/system_resources.h"
 #include "scene_test.h"
 #include "../engine/system_renderer.h"
 #include "../prefabs/player.h"
-#include "../prefabs/hud_manager.h"
 #include "../prefabs/crosshair.h"
 #include "../prefabs/pause.h"
-
+#include "LevelSystem.h"
 #include <SFML/Graphics.hpp>
 
 using namespace std;
 using namespace sf;
 
 void TestScene::Load() {
-    LevelSystem::loadLevelFile("res/levels/maze.txt", 32.0f);
+    LevelSystem::loadLevelFile("res/levels/smallFloorMap.txt", 32.0f);
 
-    gameView = Engine::GetWindow().getDefaultView();
-    gameView.reset(sf::FloatRect(0, 0, Engine::GetWindow().getSize().x, Engine::GetWindow().getSize().y));
-    player = makeEntity();
-    auto p = player->addComponent<Player>();
-    player->setPosition({static_cast<float>(Engine::GetWindow().getSize().x / 2), static_cast<float>(Engine::GetWindow().getSize().y / 2)});
-    gameView.setCenter(player->getPosition());
+
+
+
+
 
     //HUD Variables
     uiView = Engine::GetWindow().getDefaultView();
     uiView.reset(sf::FloatRect(0, 0, Engine::GetWindow().getSize().x, Engine::GetWindow().getSize().y));
     hudManager = makeUiEntity();
     auto h = hudManager->addComponent<HUDManager>();
+
+    gameView = Engine::GetWindow().getDefaultView();
+    gameView.reset(sf::FloatRect(0, 0, Engine::GetWindow().getSize().x, Engine::GetWindow().getSize().y));
+    player = makeEntity();
+    player->setPosition(LevelSystem::getTilePosition(LevelSystem::findTiles(ls::START)[0]));
+    auto p = player->addComponent<Player>(h);
+    gameView.setCenter(player->getPosition());
+
 
     crosshair = makeEntity();
     auto c = crosshair->addComponent<Crosshair>();
@@ -41,6 +45,7 @@ void TestScene::Load() {
 
     // fade in
     Engine::_gameState = GameStates::PREPARE;
+
 }
 
 void TestScene::Update(const double& dt) {
@@ -97,9 +102,7 @@ void TestScene::Render() {
     if (!isLoaded()) return;
 
     Engine::setView(gameView);
-
-    LevelSystem::renderFloor(Engine::GetWindow());
-    LevelSystem::render(Engine::GetWindow());
+    ls::render(Engine::GetWindow());
     ecm.render();
     Renderer::render();
 
@@ -114,3 +117,4 @@ void TestScene::NextWave() {
     auto h = hudManager->get_components<HUDManager>()[0];
     zombieSpawner->startWave();
 }
+

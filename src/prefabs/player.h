@@ -7,6 +7,7 @@
 #include "../components/cmp_projectile_emitter.h"
 #include "../components/cmp_sprite.h"
 #include "../components/cmp_character_controller.h"
+#include "hud_manager.h"
 #include <Box2D/Box2D.h>
 #include <ecm.h>
 
@@ -50,6 +51,8 @@ private:
     std::shared_ptr<AnimatorComponent> _animator;
     b2Body* _body;
 
+    std::shared_ptr<HUDManager> _hud;
+
     int pistolAmmo = 200;
     int shotgunAmmo = 50;
     int rifleAmmo = 100;
@@ -68,6 +71,8 @@ private:
     float interactCooldown = 0.5f;
     float interactTimer = 0.0f;
 
+    int score = 0;
+
     float footstepTimer = 0.0f;
     const float footstepInterval = 0.5f;
 
@@ -81,7 +86,7 @@ private:
     Animation _reload = Animation(nullptr, {});
     Animation _interact = Animation(nullptr, {});
 public:
-    explicit Player(Entity* p);
+    explicit Player(Entity* p, const std::shared_ptr<HUDManager>& h);
     ~Player() override {
         _parent->setForDelete();
     }

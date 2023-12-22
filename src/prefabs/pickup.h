@@ -14,13 +14,15 @@ private:
     std::function<void()> onPickup;
     std::shared_ptr<SpriteComponent> _sprite;
 
+    b2Body* _body;
+
 public:
     explicit Pickup(Entity* p, PickupType type);
     ~Pickup() override = default;
 
-    void setOnPickup(std::function<void()> func);
-
     void update(double dt) override {}
+
+    void onCollisionEnter(Entity* other);
 
     void render() override {}
 

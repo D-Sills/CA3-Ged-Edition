@@ -11,6 +11,10 @@ ZombieSpawner::ZombieSpawner(sf::FloatRect spawnArea, float spawnInterval)
     _randomEngine.seed(std::random_device()());
 }
 
+ZombieSpawner::~ZombieSpawner() {
+    _zombiePool.clear();
+}
+
 void ZombieSpawner::update(double dt) {
     if (!_waveActive) return;
 
@@ -84,9 +88,8 @@ void ZombieSpawner::configureZombie(Entity* zombie) {
 void ZombieSpawner::spawnZombie() {
     auto zombie = _zombiePool.acquireObject();
     if (zombie) {
-        zombie->setPosition(getRandomSpawnPosition());
         auto z = zombie->get_components<Zombie>()[0];
-        z->init();
+        z->init(getRandomSpawnPosition());
         z->setOnRelease([this, z]() {
             z->tearDown();
             _zombiePool.releaseObject((shared_ptr<Entity> &) z->_parent);
@@ -97,3 +100,4 @@ void ZombieSpawner::spawnZombie() {
         //std::cout << "Zombie pool size: " << _zombiePool.getPool().size() << std::endl;
     }
 }
+

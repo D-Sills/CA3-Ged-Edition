@@ -6,21 +6,28 @@ ZombieAIComponent::ZombieAIComponent(Entity* p, float attackRange, float damage)
 }
 
 void ZombieAIComponent::update(double dt) {
-    if (_currentState == ZombieState::Chasing && _target) {
-        _pathfindingComponent->requestPath(_target->getPosition());
-    }
+    //if (_currentState == ZombieState::Chasing && _target) {
+     //   _pathfindingComponent->requestPath(_target->getPosition());
+   // }
 
-    if (_currentState == ZombieState::Attacking) {
-        if (_attackTimer.getElapsedTime().asSeconds() > 1.0f) { // Example attack rate
-            attackTarget();
-            _attackTimer.restart();
-        }
-    }
+    //if (_currentState == ZombieState::Attacking) {
+     //   if (_attackTimer.getElapsedTime().asSeconds() > 1.0f) { // Example attack rate
+     //       attackTarget();
+      //      _attackTimer.restart();
+      //  }
+   // }
 
     // Transition to Attacking state
-    if (_target && _pathfindingComponent->isPathComplete()) {
-        _currentState = ZombieState::Attacking;
-    }
+    //if (_target && _pathfindingComponent->isPathComplete()) {
+     //   _currentState = ZombieState::Attacking;
+    //
+    //Face the target
+    auto dir = _target->getPosition() - _parent->getPosition();
+    float angle = atan2f(dir.y, dir.x);
+
+
+
+
 }
 
 void ZombieAIComponent::setTarget(const std::shared_ptr<Entity>& target) {

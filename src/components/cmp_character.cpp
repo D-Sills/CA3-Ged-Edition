@@ -6,12 +6,20 @@ void CharacterComponent::setHealth(int health) {
     _health = health;
 }
 
+void CharacterComponent::setMaxHealth(int maxHealth) {
+    _maxHealth = maxHealth;
+}
+
 void CharacterComponent::setDamage(int damage) {
     _damage = damage;
 }
 
 int CharacterComponent::getHealth() const {
     return _health;
+}
+
+int CharacterComponent::getMaxHealth() const {
+    return _maxHealth;
 }
 
 int CharacterComponent::getDamage() const {

@@ -4,14 +4,14 @@
 #include <SFML/Graphics.hpp>
 #include <memory>
 
-class SpriteComponent : public Component {
+class UISpriteComponent : public Component {
 protected:
     std::shared_ptr<sf::Sprite> sprite;
     std::shared_ptr<sf::Texture> texture;
 
 public:
-    SpriteComponent() = delete;
-    explicit SpriteComponent(Entity* parent);
+    UISpriteComponent() = delete;
+    explicit UISpriteComponent(Entity* parent);
 
     void init(const std::shared_ptr<sf::Texture>& tex, const sf::IntRect& rect = sf::IntRect());
     void update(double dt) override;

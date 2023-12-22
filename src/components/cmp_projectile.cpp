@@ -34,7 +34,6 @@ ProjectileComponent::ProjectileComponent(Entity* p) : Component(p) {
 
 void ProjectileComponent::init() {
     _parent->addTag("bullet");
-    _parent->setPosition(sf::Vector2f (10000, 10000));
     _parent->setVisible(true);
 
     _parent->setOnCollision([this](Entity* e) { onCollisionEnter(e); });
@@ -46,8 +45,8 @@ void ProjectileComponent::update(double dt) {
     RenderWindow& window = Engine::GetWindow();
     const View view = window.getView();
 
-    if (getPosition().x < view.getCenter().x - 100 - view.getSize().x * 0.5 || getPosition().x > view.getCenter().x + 100 + view.getSize().x * 0.5
-        || getPosition().y < view.getCenter().y - 100 - view.getSize().y * 0.5 || getPosition().y > view.getCenter().y + 100 + view.getSize().y * 0.5) {
+    if (_parent->getPosition().x < view.getCenter().x - 100 - view.getSize().x * 0.5 || _parent->getPosition().x > view.getCenter().x + 100 + view.getSize().x * 0.5
+        || _parent->getPosition().y < view.getCenter().y - 100 - view.getSize().y * 0.5 || _parent->getPosition().y > view.getCenter().y + 100 + view.getSize().y * 0.5) {
         if (_onRelease) {
             Physics::markBodyForDestruction(_body);
             _onRelease();

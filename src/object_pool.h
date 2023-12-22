@@ -14,8 +14,20 @@ class ObjectPool {
 public:
     explicit ObjectPool(size_t size, std::function<void(std::shared_ptr<Entity>)> initFunc);
     std::shared_ptr<Entity> acquireObject();
-    void releaseObject(std::shared_ptr<Entity>& entity);
+    void releaseObject(const std::shared_ptr<Entity>& entity);
     void forEach(const std::function<void(std::shared_ptr<Entity>)>& func);
+    void clear() {
+        for (auto& entity : pool) {
+            entity->setVisible(false);
+            entity->setPosition({10000, 10000});
+            entity->removeComponents();
+        }
+        availableIndices = std::stack<size_t>();
+        for (size_t i = 0; i < pool.size(); ++i) {
+            availableIndices.push(i);
+        }
+
+    }
 
 private:
     std::vector<std::shared_ptr<Entity>> pool;
@@ -53,7 +65,7 @@ std::shared_ptr<Entity> ObjectPool<T>::acquireObject() {
 }
 
 template <typename T>
-void ObjectPool<T>::releaseObject(std::shared_ptr<Entity>& entity) {
+void ObjectPool<T>::releaseObject(const std::shared_ptr<Entity>& entity) {
     auto it = std::find(pool.begin(), pool.end(), entity);
     if (it != pool.end()) {
         size_t index = std::distance(pool.begin(), it);

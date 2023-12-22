@@ -51,14 +51,15 @@ target_include_directories(lib_maths INTERFACE "${CMAKE_SOURCE_DIR}/lib/maths")
 # Tile level loader library
 file(GLOB_RECURSE TILE_LOADER_SOURCES
         "${CMAKE_SOURCE_DIR}/lib/tile_level_loader/*.cpp"
-        "${CMAKE_SOURCE_DIR}/lib/tile_level_loader/*.h")
+        "${CMAKE_SOURCE_DIR}/lib/tile_level_loader/*.h"
+        "${CMAKE_SOURCE_DIR}/lib/tile_level_loader/*.hpp")
 add_library(lib_tile_level_loader STATIC ${TILE_LOADER_SOURCES})
 target_include_directories(lib_tile_level_loader INTERFACE "${CMAKE_SOURCE_DIR}/lib/tile_level_loader")
 
 # A* library
 file(GLOB_RECURSE ASTAR_SOURCES
         "${CMAKE_SOURCE_DIR}/lib/a_star/*.cpp"
-        "${CMAKE_SOURCE_DIR}/lib/a_star/*.h")
+        "${CMAKE_SOURCE_DIR}/lib/a_star/*.hpp")
 add_library(lib_astar STATIC ${ASTAR_SOURCES})
 target_include_directories(lib_astar INTERFACE "${CMAKE_SOURCE_DIR}/lib/a_star")
 

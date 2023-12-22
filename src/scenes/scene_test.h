@@ -4,7 +4,6 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
 #include "../zombie_factory.h"
-#include <LevelSystem.h>
 
 class TestScene : public Scene {
 public:
